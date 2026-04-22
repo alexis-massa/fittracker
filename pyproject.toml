@@ -1,0 +1,42 @@
+[project]
+name = "fittracker"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "nicegui>=3.10.0",
+    "pymongo>=4.17.0",
+    "python-dotenv>=1.2.2",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.20.2",
+    "ruff>=0.15.11",
+]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+
+
+[tool.ruff.mccabe]
+max-complexity = 15
+
+
+[tool.ruff.isort]
+force-single-line = true
+force-sort-within-sections = true
+combine-as-imports = true
+
+[tool.ruff.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+ignore_missing_imports = true
