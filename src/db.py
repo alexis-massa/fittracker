@@ -14,7 +14,12 @@ class DatabaseManager:
         self._db: Database[dict[str, Any]] | None = None
 
     def connect(self) -> None:
-        self._client = MongoClient(MONGO_URI)
+        self._client = MongoClient(
+            MONGO_URI,
+            tls=True,
+            tlsAllowInvalidCertificates=False,
+            serverSelectionTimeoutMS=5000,
+        )
         self._db = self._client[DB_NAME]
         print(f"Connected to MongoDB — {DB_NAME}")
 

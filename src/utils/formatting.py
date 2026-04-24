@@ -11,7 +11,7 @@ def scale_label(value: int, scale: dict[int, str], fallback: str = "—") -> str
     return scale.get(value, fallback)
 
 
-def pluralise(count: int, singular: str, plural: str | None = None) -> str:
+def pluralize(count: int, singular: str, plural: str | None = None) -> str:
     if plural is None:
         plural = singular + "s"
     return f"{count} {singular if count == 1 else plural}"
