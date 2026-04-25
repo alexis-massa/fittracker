@@ -152,13 +152,7 @@ def _show_inline_form(
     container: ui.column,
     refresh: Callable[[], None],
 ) -> None:
-    with (
-        container,
-        ui.card().style(
-            "background:#1a1a1a;border:1px solid #2a2a2a;"
-            "padding:1rem;border-radius:4px;width:100%;margin-top:0.5rem"
-        ) as inline_card,
-    ):
+    with container, ui.card() as inline_card:
         ui.label("New Exercise").style(
             "font-size:0.72rem;color:#555;letter-spacing:0.1em;"
             "text-transform:uppercase;margin-bottom:0.5rem"
