@@ -66,27 +66,27 @@ def render(session_id: str | None, navigate: Callable[..., None]) -> None:
             btn_danger("Delete", on_click=lambda: _delete(sid, navigate))
 
 
-def _exercise_group(title: str, ex_ids: list[str], dim: bool = False) -> None:
+def _exercise_group(title: str, exercises: list[Exercise], dim: bool = False) -> None:
     section_title(title)
-    for eid in ex_ids:
-        ex = exercise_model.get_by_id(eid)
-        if ex:
-            _exercise_row(ex, dim=dim)
+    for ex in exercises:
+        _exercise_row(ex, dim=dim)
 
 
-def _exercise_row(ex: Exercise, dim: bool = False) -> None:
+def _exercise_row(exercise: Exercise, dim: bool = False) -> None:
     color = "#666" if dim else "#e8e4dc"
     opacity = "opacity:0.6;" if dim else ""
     card = ui.row().classes("card").style(f"align-items:center;{opacity}")
     column = ui.column().style("gap:3px")
     row = ui.row().style("align-items:center;gap:8px")
     with card and column and row:
-        ui.label(ex.name).style(
+        ui.label(exercise.name).style(
             f"font-family:'Syne',sans-serif;font-weight:600;font-size:0.9rem;color:{color}"
         )
-        if ex.variant:
-            tag(ex.variant, accent=True)
-        ui.label(f"{ex.sets} sets · {ex.reps} reps · {ex.rest_seconds}s rest").classes("meta-row")
+        if exercise.variant:
+            tag(exercise.variant, accent=True)
+        ui.label(
+            f"{exercise.sets} sets · {exercise.reps} reps · {exercise.rest_seconds}s rest"
+        ).classes("meta-row")
 
 
 def _delete(session_id: str, navigate: Callable[..., None]) -> None:

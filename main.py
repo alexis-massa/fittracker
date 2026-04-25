@@ -3,6 +3,7 @@ from nicegui import app
 from nicegui import ui
 
 from src.db import db_manager
+import src.preferences as preferences
 from src.ui.layout import build_layout
 
 
@@ -22,4 +23,5 @@ def index() -> None:
 
 
 if __name__ in {"__main__", "__mp_main__"}:
-    ui.run(title="FitTracker", port=8080, reload=False)
+    prefs = preferences.load()
+    ui.run(title="FitTracker", port=8080, dark=prefs.dark_mode)

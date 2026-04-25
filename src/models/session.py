@@ -6,6 +6,7 @@ import enum
 import typing
 
 from src.db import db_manager
+from src.models.exercise import Exercise
 from src.utils import mongo as mongo_utils
 from src.utils.formatting import today_iso
 
@@ -30,9 +31,9 @@ class Session:
     notes: str | None = None
     energy_level: EnergyLevel | None = None
     date: str = field(default_factory=today_iso)
-    warmup: list[str] = field(default_factory=list)
-    workout: list[str] = field(default_factory=list)
-    stretches: list[str] = field(default_factory=list)
+    warmup: list[Exercise] = field(default_factory=list)
+    workout: list[Exercise] = field(default_factory=list)
+    stretches: list[Exercise] = field(default_factory=list)
     progress: ProgressEnum = ProgressEnum.MAINTAIN
     _id: str = field(default="", repr=False)
 
@@ -42,16 +43,19 @@ class Session:
 
     @classmethod
     def from_doc(cls, doc: dict[str, typing.Any]) -> "Session":
+        def build_ex_list(items: list[dict[str, typing.Any]]) -> list[Exercise]:
+            return [Exercise(**item) for item in items]
+
         return cls(
-            _id=str(doc.get("_id", "")),
+            _id=str(doc["_id"]),
             date=doc.get("date", today_iso()),
             weight=doc.get("weight"),
             notes=doc.get("notes"),
-            energy_level=EnergyLevel(doc["energy_level"]) if doc.get("energy_level") else None,
+            energy_level=EnergyLevel(doc["energy_level"]) if "energy_level" in doc else None,
             progress=ProgressEnum(doc.get("progress", ProgressEnum.MAINTAIN)),
-            warmup=doc.get("warmup", []),
-            workout=doc.get("exercises", []),
-            stretches=doc.get("stretches", []),
+            warmup=build_ex_list(doc.get("warmup", [])),
+            workout=build_ex_list(doc.get("workout", [])),
+            stretches=build_ex_list(doc.get("stretches", [])),
         )
 
     def to_doc(self) -> dict[str, typing.Any]:

@@ -3,4 +3,4 @@ from nicegui import ui
 
 
 def form_card() -> ui.card:
-    return ui.card()
+    return ui.card().classes("card-form")

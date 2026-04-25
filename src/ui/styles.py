@@ -79,10 +79,10 @@ body {
 
 /* List pages — constrained width */
 .page-content {
-    max-width: 900px;
+    max-width: 90%;
     margin: 0 auto;
     padding: 2rem 1.5rem;
-    width: 100%;
+    width: 70%;
 }
 
 /* Form pages — full width, generous padding */
@@ -227,6 +227,152 @@ body {
     font-size: 0.95rem;
     color: var(--text);
 }
+
+/* ── Spacing utilities ──────────────────────────────────────────────────── */
+
+.spacer-sm  { height: 0.5rem; }
+.spacer-md  { height: 1.25rem; }
+.spacer-lg  { height: 1.5rem; }
+
+/* ── Form layout ────────────────────────────────────────────────────────── */
+
+.page-content-wide {
+    width: 100%;
+    padding: 2rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-form {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.5rem;
+    width: 100%;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.card-inline {
+    background: var(--bg-inline);
+    border: 1px solid var(--border-mid);
+    border-radius: 4px;
+    padding: 1rem;
+    width: 100%;
+    margin-top: 0.5rem;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+/* ── Exercise group ─────────────────────────────────────────────────────── */
+
+.exercise-group {
+    width: 100%;
+    gap: 0;
+}
+
+.exercise-row {
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+    width: 100%;
+}
+
+.exercise-label {
+    flex: 1;
+    font-size: 0.82rem;
+}
+
+/* ── Input rows ─────────────────────────────────────────────────────────── */
+
+.input-row {
+    gap: 8px;
+    margin-top: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.input-row-grow {
+    flex: 1;
+    width: auto;
+    min-width: 160px;
+}
+
+/* ── Inline form ────────────────────────────────────────────────────────── */
+
+.inline-form-title {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+/* ── Action row ─────────────────────────────────────────────────────────── */
+
+.action-row {
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    align-items: center;
+}
+
+/* Fix: ui.card() Quasar background override for theme responsiveness */
+.q-card {
+    background: var(--bg-card) !important;
+    color: var(--text) !important;
+    transition: background 0.2s, color 0.2s;
+}
+
+.card-inline {
+    background: var(--bg-inline) !important;
+    border: 1px solid var(--border-mid);
+    border-radius: 4px;
+    padding: 1rem;
+    width: 100%;
+    margin-top: 0.5rem;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+/* ── Exercise row ───────────────────────────────────────────────────────── */
+
+.exercise-row {
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+    width: 100%;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.exercise-info {
+    flex: 1;
+    gap: 2px;
+}
+
+.exercise-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* ── Reorder buttons ────────────────────────────────────────────────────── */
+
+.reorder-btns {
+    gap: 0;
+}
+
+.btn-reorder {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: var(--text-dimmer) !important;
+    padding: 0 !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: 18px !important;
+    width: 24px !important;
+    font-size: 0.7rem !important;
+    transition: color 0.15s !important;
+}
+.btn-reorder:hover { color: var(--text) !important; }
 
 /* ── Labels & tags ──────────────────────────────────────────────────────── */
 
