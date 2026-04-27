@@ -14,6 +14,7 @@ from src.ui.components import action_row
 from src.ui.components import btn_danger
 from src.ui.components import btn_ghost
 from src.ui.components import btn_primary
+from src.ui.components import date_field
 from src.ui.components import form_card
 from src.ui.components import input_field
 from src.ui.components import number_field
@@ -40,8 +41,8 @@ def render(session_id: str | None, navigate: Callable[..., None]) -> None:
 
         section_title("Session info")
         with form_card():
-            date_in = input_field(
-                "Date (YYYY-MM-DD)",
+            date_in = date_field(
+                "Date",
                 value=existing.date if existing else today_iso(),
             )
             ui.element("div").style("height:0.5rem")
@@ -101,14 +102,14 @@ def render(session_id: str | None, navigate: Callable[..., None]) -> None:
 
 def _exercise_group(title: str, ex_list: list[Exercise]) -> None:
     section_title(title)
-    container = ui.column().style("width:100%;max-width:520px;gap:0")
+    container = ui.column().classes("w-full").style("gap:0")
 
     def refresh() -> None:
         container.clear()
         with container:
             for i, ex in enumerate(ex_list):
                 label = ex.display_name if ex else ex.id
-                with ui.row().style("align-items:center;gap:8px;margin-bottom:4px;width:100%"):
+                with ui.row().classes("c-full").style("align-items:center;gap:8px;margin-bottom:4px"):
                     ui.label(label).style("flex:1;font-size:0.82rem;color:#e8e4dc")
                     if ex.variant:
                         tag(ex.variant, accent=True)
@@ -119,9 +120,7 @@ def _exercise_group(title: str, ex_list: list[Exercise]) -> None:
     ex_map = {e.display_name: e for e in exercise_model.get_all()}
     ex_labels = list(ex_map.keys())
 
-    with ui.row().style(
-        "gap:8px;margin-top:0.5rem;max-width:520px;align-items:center;flex-wrap:wrap"
-    ):
+    with ui.row().classes("align-center").style("gap:8px;margin-top:0.5rem"):
         if ex_labels:
             sel = select_field("Add existing", options=ex_labels).style(
                 "flex:1;width:auto;min-width:180px"
@@ -153,29 +152,25 @@ def _show_inline_form(
 ) -> None:
     with (
         container,
-        ui.card().style(
-            "background:#1a1a1a;border:1px solid #2a2a2a;"
-            "padding:1rem;border-radius:4px;width:100%;margin-top:0.5rem"
+        ui.card()
+        .classes("w-full")
+        .style(
+            "background:#1a1a1a;border:1px solid #2a2a2a;padding:0.5rem;margin-top:0.5rem"
         ) as inline_card,
+        ui.row().classes("w-full items-center gap-2 no-wrap"),
     ):
-        ui.label("New Exercise").style(
-            "font-size:0.72rem;color:#555;letter-spacing:0.1em;"
-            "text-transform:uppercase;margin-bottom:0.5rem"
-        )
-        name_in = input_field("Name")
-        ui.element("div").style("height:0.4rem")
-        variant_in = input_field("Variant (e.g. A1)")
-        ui.element("div").style("height:0.4rem")
-        with ui.row().style("gap:0.5rem;width:100%"):
-            sets_in = number_field("Sets", value=3, min=1, max=20).style("flex:1;width:auto")
-            reps_in = number_field("Reps", value=10, min=1, max=200).style("flex:1;width:auto")
-            rest_in = number_field("Rest (s)", value=90, min=0, max=600).style("flex:1;width:auto")
-        ui.element("div").style("height:0.5rem")
+        name_in = input_field("Name").classes("w-40")
+        variant_in = input_field("Variant").classes("w-24")
+
+        sets_in = number_field("Sets", value=3, min=1, max=20).classes("w-16")
+        reps_in = number_field("Reps", value=10, min=1, max=200).classes("w-16")
+        rest_in = number_field("Rest (s)", value=90, min=0, max=3600).classes("w-20")
 
         def save_inline() -> None:
             if not name_in.value.strip():
                 ui.notify("Name is required", color="negative")
                 return
+
             new_exercise = Exercise(
                 name=name_in.value.strip(),
                 variant=variant_in.value.strip() or None,
@@ -183,14 +178,14 @@ def _show_inline_form(
                 reps=int(reps_in.value or 10),
                 rest_seconds=int(rest_in.value or 90),
             )
+
             exercises.append(new_exercise)
             inline_card.delete()
             refresh()
-            ui.notify(f"'{new_exercise.display_name}' created and added", color="positive")
+            ui.notify(f"'{new_exercise.display_name}' added", color="positive")
 
-        with ui.row().style("gap:0.5rem"):
-            btn_primary("Save", on_click=save_inline)
-            btn_ghost("Cancel", on_click=inline_card.delete)
+        btn_primary("✓", on_click=save_inline)
+        btn_ghost("✕", on_click=inline_card.delete)
 
 
 def _save(

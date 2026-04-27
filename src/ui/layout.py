@@ -78,7 +78,7 @@ def build_layout() -> None:
 
     ui.add_head_html(f"<style>{STYLES}</style>")
 
-    with ui.row().classes("app-header").style("width:100%"):
+    with ui.row().classes("app-header w-full"):
         ui.label("FitTracker").classes("app-title")
         for label, page in [("Sessions", "sessions"), ("Exercises", "exercises")]:
             btn = ui.button(label, on_click=lambda p=page: navigate(str(p))).classes("nav-btn")
@@ -86,5 +86,5 @@ def build_layout() -> None:
         with ui.row().classes("ml-auto"):
             theme_toggle(dark)
 
-    _main_container["el"] = ui.column().style("width:100%;min-height:calc(100vh - 56px)")
+    _main_container["el"] = ui.column().classes("w-full").style("min-height:calc(100vh - 56px)")
     navigate("sessions")

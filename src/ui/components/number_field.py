@@ -5,4 +5,4 @@ from nicegui import ui
 
 
 def number_field(label: str, value: float = 0.0, **kwargs: Any) -> ui.number:
-    return ui.number(label, value=value, **kwargs).classes("nicegui-input").style("width:100%")
+    return ui.number(label, value=value, **kwargs).classes("nicegui-input").classes("w-full")

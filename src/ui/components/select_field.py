@@ -13,5 +13,6 @@ def select_field(
     return (
         ui.select(label=label, options=options, value=value, **kwargs)
         .classes("nicegui-select")
-        .style("width:100%")
+        .classes("w-full")
     )
+    
