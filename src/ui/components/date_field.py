@@ -16,5 +16,5 @@ def date_field(label: str, value: str | None = None, **kwargs: Any) -> ui.input:
     ):
         ui.button("Close", on_click=menu.close).props("flat")
         with date.add_slot("append"):
-            ui.icon('edit_calendar').on('click', menu.open).classes('cursor-pointer')
+            ui.icon("edit_calendar").on("click", menu.open).classes("cursor-pointer")
     return date

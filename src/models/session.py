@@ -1,12 +1,11 @@
 # src/models/session.py
-from dataclasses import asdict
 from dataclasses import dataclass
 from dataclasses import field
 import enum
-import typing
+from typing import Any
 
 from src.db import db_manager
-from src.models.exercise import Exercise
+from src.models.exercise import SessionExercise
 from src.utils import mongo as mongo_utils
 from src.utils.formatting import today_iso
 
@@ -27,14 +26,14 @@ class ProgressEnum(enum.StrEnum):
 
 @dataclass
 class Session:
+    date: str = field(default_factory=today_iso)
     weight: float | None = None
     notes: str | None = None
     energy_level: EnergyLevel | None = None
-    date: str = field(default_factory=today_iso)
-    warmup: list[Exercise] = field(default_factory=list)
-    workout: list[Exercise] = field(default_factory=list)
-    stretches: list[Exercise] = field(default_factory=list)
     progress: ProgressEnum = ProgressEnum.MAINTAIN
+    warmup: list[SessionExercise] = field(default_factory=list)
+    workout: list[SessionExercise] = field(default_factory=list)
+    stretches: list[SessionExercise] = field(default_factory=list)
     _id: str = field(default="", repr=False)
 
     @property
@@ -42,26 +41,38 @@ class Session:
         return self._id
 
     @classmethod
-    def from_doc(cls, doc: dict[str, typing.Any]) -> "Session":
-        def build_ex_list(items: list[dict[str, typing.Any]]) -> list[Exercise]:
-            return [Exercise(**item) for item in items]
+    def from_doc(cls, doc: dict[str, Any]) -> "Session":
+        def build(items: list[Any]) -> list[SessionExercise]:
+            return [SessionExercise.from_doc(i) if isinstance(i, dict) else i for i in items]
 
         return cls(
-            _id=str(doc["_id"]),
+            _id=str(doc.get("_id", "")),
             date=doc.get("date", today_iso()),
             weight=doc.get("weight"),
             notes=doc.get("notes"),
-            energy_level=EnergyLevel(doc["energy_level"]) if "energy_level" in doc else None,
+            energy_level=EnergyLevel(doc["energy_level"]) if doc.get("energy_level") else None,
             progress=ProgressEnum(doc.get("progress", ProgressEnum.MAINTAIN)),
-            warmup=build_ex_list(doc.get("warmup", [])),
-            workout=build_ex_list(doc.get("workout", [])),
-            stretches=build_ex_list(doc.get("stretches", [])),
+            warmup=build(doc.get("warmup", [])),
+            workout=build(doc.get("workout", [])),
+            stretches=build(doc.get("stretches", [])),
         )
 
-    def to_doc(self) -> dict[str, typing.Any]:
-        doc = asdict(self)
-        doc.pop("_id", None)
-        return doc
+    def to_doc(self) -> dict[str, Any]:
+        return {
+            "date": self.date,
+            "weight": self.weight,
+            "notes": self.notes,
+            "energy_level": self.energy_level.value if self.energy_level else None,
+            "progress": self.progress.value,
+            "warmup": [e.to_doc() for e in self.warmup],
+            "workout": [e.to_doc() for e in self.workout],
+            "stretches": [e.to_doc() for e in self.stretches],
+        }
+
+
+# ---------------------------------------------------------------------------
+# CRUD
+# ---------------------------------------------------------------------------
 
 
 def get_all() -> list[Session]:
