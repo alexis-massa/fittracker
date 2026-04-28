@@ -22,22 +22,18 @@ from src.ui.components import section_title
 def render(exercise_id: str | None, navigate: Callable[[str], None]) -> None:
     existing = exercise_model.get_by_id(exercise_id) if exercise_id else None
 
-    with ui.column().classes("page-content"):
+    with ui.column().classes("page-content"), ui.row().classes("w-full justify-stretch"):
         page_title("Edit Exercise" if existing else "New Exercise")
         section_title("Exercise details")
 
         with form_card():
             name_in = input_field("Name", value=existing.name if existing else "")
-            ui.element("div").style("height:0.5rem")
             variant_in = input_field(
                 "Variant",
                 value=existing.variant if existing and existing.variant else "",
             )
-            ui.element("div").style("height:0.5rem")
-            sets_in = number_field("Sets", value=existing.sets if existing else 3, min=1, max=20)
-            ui.element("div").style("height:0.5rem")
-            reps_in = number_field("Reps", value=existing.reps if existing else 10, min=1, max=200)
-            ui.element("div").style("height:0.5rem")
+            sets_in = number_field("Sets", value=existing.sets if existing else 3, min=1, max=1000)
+            reps_in = number_field("Reps", value=existing.reps if existing else 10, min=1, max=1000)
             rest_in = number_field(
                 "Rest (s)", value=existing.rest_seconds if existing else 90, min=0, max=600
             )

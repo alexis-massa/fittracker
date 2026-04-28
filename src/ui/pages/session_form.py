@@ -23,7 +23,6 @@ from src.ui.components import section_title
 from src.ui.components import select_field
 from src.ui.components import tag
 from src.ui.components import textarea_field
-from src.utils.formatting import today_iso
 
 _ENERGY_OPTIONS: dict[int, str] = {e.value: e.name.replace("_", " ").title() for e in EnergyLevel}
 _PROGRESS_OPTIONS: dict[str, str] = {p.value: p.value.title() for p in ProgressEnum}
@@ -40,47 +39,44 @@ def render(session_id: str | None, navigate: Callable[..., None]) -> None:
         page_title("Edit Session" if existing else "New Session")
 
         section_title("Session info")
-        with form_card():
+        with form_card(), ui.row().classes("w-full justify-stretch"):
             date_in = date_field(
                 "Date",
-                value=existing.date if existing else today_iso(),
+                value=existing.date if existing else None,
             )
-            ui.element("div").style("height:0.5rem")
+
             weight_in = number_field(
-                "Bodyweight (kg)",
+                "Weight",
                 value=existing.weight if existing and existing.weight is not None else 0.0,
                 min=0,
-                max=300,
+                max=999,
+                step=0.1
             )
-            ui.element("div").style("height:0.5rem")
+
             energy_in = select_field(
-                "Energy Level",
+                "Energy",
                 options=_ENERGY_OPTIONS,
                 value=existing.energy_level.value
                 if existing and existing.energy_level
                 else EnergyLevel.MEDIUM.value,
             )
-            ui.element("div").style("height:0.5rem")
+
             progress_in = select_field(
                 "Progress",
                 options=_PROGRESS_OPTIONS,
                 value=existing.progress.value if existing else ProgressEnum.MAINTAIN.value,
             )
-            ui.element("div").style("height:0.5rem")
+
             notes_in = textarea_field(
                 "Notes",
                 value=existing.notes if existing and existing.notes is not None else "",
-            )
+            ).classes("grow-1")
 
-        ui.element("div").style("height:1.5rem")
 
         _exercise_group("Warmup", warmup_exs)
-        ui.element("div").style("height:1.25rem")
         _exercise_group("Workout", workout_exs)
-        ui.element("div").style("height:1.25rem")
         _exercise_group("Stretches", stretch_exs)
 
-        ui.element("div").style("height:1rem")
         with action_row():
             btn_primary(
                 "Save Session",
@@ -109,7 +105,7 @@ def _exercise_group(title: str, ex_list: list[Exercise]) -> None:
         with container:
             for i, ex in enumerate(ex_list):
                 label = ex.display_name if ex else ex.id
-                with ui.row().classes("c-full").style("align-items:center;gap:8px;margin-bottom:4px"):
+                with ui.row().classes("c-full align-center").style("gap:8px;margin-bottom:4px"):
                     ui.label(label).style("flex:1;font-size:0.82rem;color:#e8e4dc")
                     if ex.variant:
                         tag(ex.variant, accent=True)
@@ -152,19 +148,14 @@ def _show_inline_form(
 ) -> None:
     with (
         container,
-        ui.card()
-        .classes("w-full")
-        .style(
-            "background:#1a1a1a;border:1px solid #2a2a2a;padding:0.5rem;margin-top:0.5rem"
-        ) as inline_card,
+        ui.card().classes("w-full") as inline_card,
         ui.row().classes("w-full items-center gap-2 no-wrap"),
     ):
-        name_in = input_field("Name").classes("w-40")
-        variant_in = input_field("Variant").classes("w-24")
-
-        sets_in = number_field("Sets", value=3, min=1, max=20).classes("w-16")
-        reps_in = number_field("Reps", value=10, min=1, max=200).classes("w-16")
-        rest_in = number_field("Rest (s)", value=90, min=0, max=3600).classes("w-20")
+        name_in = input_field("Name").classes("flex-1")
+        variant_in = input_field("Variant").classes("flex-1")
+        sets_in = number_field("Sets", value=3, min=1, max=20).classes("flex-1")
+        reps_in = number_field("Reps", value=10, min=1, max=200).classes("flex-1")
+        rest_in = number_field("Rest (s)", value=90, min=0, max=3600).classes("flex-1")
 
         def save_inline() -> None:
             if not name_in.value.strip():

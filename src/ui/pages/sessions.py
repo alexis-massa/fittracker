@@ -35,7 +35,7 @@ def render(navigate: Callable[..., None]) -> None:
             n_stretches = len(s.stretches)
             energy_str = s.energy_level.name.replace("_", " ").title() if s.energy_level else "—"
 
-            with ui.row().classes("card").style("align-items:center;justify-content:space-between"):
+            with ui.row().classes("card align-center justify-between"):
                 with ui.column().style("gap:3px"):
                     ui.label(s.date).classes("card-title")
                     ui.label(

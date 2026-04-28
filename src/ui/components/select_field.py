@@ -5,14 +5,6 @@ from nicegui import ui
 
 
 def select_field(
-    label: str,
-    options: list[Any] | dict[Any, str],
-    value: Any = None,
-    **kwargs: Any,
+    label: str, options: list[Any] | dict[Any, str], value: Any = None, **kwargs: Any
 ) -> ui.select:
-    return (
-        ui.select(label=label, options=options, value=value, **kwargs)
-        .classes("nicegui-select")
-        .classes("w-full")
-    )
-    
+    return ui.select(label=label, options=options, value=value, **kwargs).classes("nicegui-select")
