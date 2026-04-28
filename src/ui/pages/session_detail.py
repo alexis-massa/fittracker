@@ -67,15 +67,15 @@ def _exercise_group(title: str, exercises: list[SessionExercise], dim: bool = Fa
 
 def _exercise_row(ex: SessionExercise, dim: bool = False) -> None:
     opacity = "opacity:0.5;" if dim else ""
-    with ui.row().classes("card items-center").style(opacity):
-        with ui.column().classes("flex-1").style("gap:3px"):
-            with ui.row().classes("items-center gap-2"):
-                ui.label(ex.name).classes("card-title")
-                if ex.variant:
-                    tag(ex.variant, accent=True)
-            ui.label(f"{ex.sets} sets · {ex.reps} reps · {ex.rest_seconds}s rest").classes(
-                "meta-row"
-            )
+    with (
+        ui.row().classes("card items-center").style(opacity),
+        ui.column().classes("flex-1").style("gap:3px"),
+    ):
+        with ui.row().classes("items-center gap-2"):
+            ui.label(ex.name).classes("card-title")
+            if ex.variant:
+                tag(ex.variant, accent=True)
+        ui.label(f"{ex.sets} sets · {ex.reps} reps · {ex.rest_seconds}s rest").classes("meta-row")
 
 
 def _delete(session_id: str, navigate: Callable[..., None]) -> None:

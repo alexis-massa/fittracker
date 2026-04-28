@@ -4,25 +4,25 @@ from collections.abc import Callable
 from nicegui import ui
 
 from src.models import session as session_model
-from src.models.exercise import ExerciseDefinition, SessionExercise
+from src.models.exercise import ExerciseDefinition
+from src.models.exercise import SessionExercise
 from src.models.exercise import create as create_definition
 from src.models.exercise import get_all as get_library
-from src.models.session import EnergyLevel, ProgressEnum, Session
-from src.ui.components import (
-    action_row,
-    btn_danger,
-    btn_ghost,
-    btn_primary,
-    date_field,
-    form_card,
-    input_field,
-    number_field,
-    page_title,
-    section_title,
-    select_field,
-    tag,
-    textarea_field,
-)
+from src.models.session import EnergyLevel
+from src.models.session import ProgressEnum
+from src.models.session import Session
+from src.ui.components import action_row
+from src.ui.components import btn_danger
+from src.ui.components import btn_ghost
+from src.ui.components import btn_primary
+from src.ui.components import date_field
+from src.ui.components import form_card
+from src.ui.components import input_field
+from src.ui.components import number_field
+from src.ui.components import page_title
+from src.ui.components import section_title
+from src.ui.components import select_field
+from src.ui.components import textarea_field
 
 _ENERGY_OPTIONS: dict[int, str] = {e.value: e.name.replace("_", " ").title() for e in EnergyLevel}
 _PROGRESS_OPTIONS: dict[str, str] = {p.value: p.value.title() for p in ProgressEnum}
@@ -179,7 +179,7 @@ def _show_exercise_form(
     def name_option(n: str, lbl: str) -> str:
         return f"{n} — {lbl}" if lbl else n
 
-    name_options = [name_option(n, l) for n, l in name_map.items()]
+    name_options = [name_option(name, label) for name, label in name_map.items()]
 
     with container, ui.card().classes("card-inline") as form_card_el:
         ui.label("Edit Exercise" if existing_ex else "Add Exercise").classes("inline-form-title")
@@ -225,7 +225,6 @@ def _show_exercise_form(
 
         with ui.row().classes("w-full items-center gap-2 flex-wrap"):
             ui.element("div")  # placeholder so variant_sel and label are built before row
-            variant_sel  # already created above, just referencing for layout clarity
 
         # When name changes, refresh variant options and auto-fill label
         def on_name_change(value: str) -> None:

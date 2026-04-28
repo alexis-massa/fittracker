@@ -5,7 +5,6 @@ from dataclasses import field
 from typing import Any
 
 from src.db import db_manager
-from src.utils import mongo as mongo_utils
 
 _COL = db_manager.get_collection  # called lazily
 _COLLECTION_NAME = "user_preferences"

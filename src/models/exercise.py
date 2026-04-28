@@ -1,5 +1,7 @@
 # src/models/exercise.py
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict
+from dataclasses import dataclass
+from dataclasses import field
 from typing import Any
 
 from src.db import db_manager

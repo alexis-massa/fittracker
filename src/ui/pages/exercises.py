@@ -4,15 +4,12 @@ from collections.abc import Callable
 from nicegui import ui
 
 from src.models import exercise as exercise_model
-from src.ui.components import (
-    btn_danger,
-    btn_ghost,
-    btn_primary,
-    page_header_row,
-    page_title,
-    section_title,
-    tag,
-)
+from src.ui.components import btn_danger
+from src.ui.components import btn_ghost
+from src.ui.components import btn_primary
+from src.ui.components import page_header_row
+from src.ui.components import page_title
+from src.ui.components import section_title
 from src.utils.formatting import pluralize
 
 

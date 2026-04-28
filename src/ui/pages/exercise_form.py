@@ -5,15 +5,13 @@ from nicegui import ui
 
 from src.models import exercise as exercise_model
 from src.models.exercise import ExerciseDefinition
-from src.ui.components import (
-    action_row,
-    btn_ghost,
-    btn_primary,
-    form_card,
-    input_field,
-    page_title,
-    section_title,
-)
+from src.ui.components import action_row
+from src.ui.components import btn_ghost
+from src.ui.components import btn_primary
+from src.ui.components import form_card
+from src.ui.components import input_field
+from src.ui.components import page_title
+from src.ui.components import section_title
 
 
 def render(exercise_id: str | None, navigate: Callable[..., None]) -> None:
