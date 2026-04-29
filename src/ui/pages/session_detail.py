@@ -53,7 +53,7 @@ def render(session_id: str | None, navigate: Callable[..., None]) -> None:
             )
 
         ui.html('<hr class="divider">')
-        sid = s._id
+        sid = s.id
         with ui.row().classes("items-center gap-2"):
             btn_ghost("Edit", on_click=lambda: navigate("session_form", sid))
             btn_danger("Delete", on_click=lambda: _delete(sid, navigate))

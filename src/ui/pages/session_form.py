@@ -123,10 +123,7 @@ def _exercise_row(
     container: ui.column,
     refresh: Callable[[], None],
 ) -> None:
-    with (
-        ui.row()
-        .classes("w-full items-center gap-2")
-    ):
+    with ui.row().classes("w-full items-center gap-2"):
         with ui.column():
             ui.button(
                 icon="expand_less", on_click=lambda idx=index: _move(ex_list, idx, -1, refresh)
@@ -163,35 +160,31 @@ def _show_exercise_form(
     existing_ex = ex_list[edit_index] if edit_index is not None else None
     library = get_library()
 
-    # Build lookup structures
-    # name → label  (unique exercise families)
-    name_map: dict[str, str] = {}
+    # name → label (one per unique name identifier)
+    name_to_label: dict[str, str] = {}
+    # name → list of variant identifiers
+    variants_for_name: dict[str, list[str]] = {}
+    # (name, variant) → variant_label
+    variant_to_label: dict[tuple[str, str], str] = {}
     for d in library:
-        if d.name not in name_map:
-            name_map[d.name] = d.label
+        if d.name not in name_to_label:
+            name_to_label[d.name] = d.label
+        if d.variant is not None:
+            variants_for_name.setdefault(d.name, []).append(d.variant)
+            variant_to_label[(d.name, d.variant)] = d.variant_label
 
-    # (name, variant) → (variant_label, definition)
-    variant_map: dict[tuple[str, str], tuple[str, ExerciseDefinition]] = {}
-    for d in library:
-        if d.variant:
-            variant_map[(d.name, d.variant)] = (d.variant_label, d)
-
-    # name select options: "A — Pushup" or just "A" if no label
-    def name_option(n: str, lbl: str) -> str:
-        return f"{n} — {lbl}" if lbl else n
-
-    name_options = [name_option(name, label) for name, label in name_map.items()]
+    # Select options are plain identifiers only: ["A", "B", ...]
+    name_options = sorted(name_to_label.keys())
 
     with container, ui.card().classes("card-inline") as form_card_el:
         ui.label("Edit Exercise" if existing_ex else "Add Exercise").classes("inline-form-title")
 
         with ui.row().classes("w-full items-center gap-2 flex-wrap"):
-            # ── Row 1: name + label ───────────────────────────────────────────
-            name_sel = ui.select(
+            name_sel = select_field(
                 options=name_options,
-                value=name_option(existing_ex.name, existing_ex.label) if existing_ex else None,
+                value=existing_ex.name if existing_ex else None,
                 label="Exercise (e.g. A)",
-                new_value_mode="add-unique",  # allows typing new values
+                new_value_mode="add-unique",
                 clearable=True,
             ).classes("flex-1 nicegui-select")
 
@@ -200,17 +193,10 @@ def _show_exercise_form(
                 value=existing_ex.label if existing_ex else "",
             ).classes("flex-1 nicegui-input")
 
-            # ── Row 2: variant + variant_label ───────────────────────────────
-            variant_options: list[str] = []  # populated when name is chosen
-
-            def variant_option(v: str, vl: str) -> str:
-                return f"{v} — {vl}" if vl else v
-
-            variant_sel = ui.select(
-                options=variant_options,
-                value=variant_option(existing_ex.variant, existing_ex.variant_label)
-                if existing_ex and existing_ex.variant
-                else None,
+            # Variant options are plain identifiers: ["1", "2", ...]
+            variant_sel = select_field(
+                options=variants_for_name.get(existing_ex.name, []) if existing_ex else [],
+                value=existing_ex.variant if existing_ex and existing_ex.variant else None,
                 label="Variant (e.g. 1)",
                 new_value_mode="add-unique",
                 clearable=True,
@@ -221,115 +207,109 @@ def _show_exercise_form(
                 value=existing_ex.variant_label if existing_ex else "",
             ).classes("flex-1 nicegui-input")
 
-        # When name changes, refresh variant options and auto-fill label
-        def on_name_change(value: str) -> None:
-            raw = value.strip() if value else ""
-
-            # Extract name part before " — " if user picked from list
-            name_part = raw.split(" — ")[0].strip() if " — " in raw else raw
-
-            # Auto-fill label if this name exists in library
-            if name_part in name_map:
-                label_in.value = name_map[name_part]
-
-            # Rebuild variant options for this name
-            opts = [
-                variant_option(v, vl) for (n, v), (vl, _) in variant_map.items() if n == name_part
-            ]
-            variant_sel.options = opts
-            variant_sel.update()
+        def on_name_change(value: str | None) -> None:
+            name = (value or "").strip()
+            # Auto-fill label if known, leave blank if new
+            label_in.value = name_to_label.get(name, "")
+            # Refresh variant options — identifiers only
+            variant_sel.options = variants_for_name.get(name, [])
             variant_sel.value = None
             variant_label_in.value = ""
+            variant_sel.update()
 
-        name_sel.on_value_change(lambda e: on_name_change(e.value or ""))
+        def on_variant_change(value: str | None) -> None:
+            name = (name_sel.value or "").strip()
+            variant = (value or "").strip()
+            key = (name, variant)
+            variant_label_in.value = variant_to_label.get(key, "")
 
-        # When variant changes, auto-fill variant_label
-        def on_variant_change(value: str) -> None:
-            raw = value.strip() if value else ""
-            v_part = raw.split(" — ")[0].strip() if " — " in raw else raw
+        name_sel.on_value_change(lambda e: on_name_change(e.value))
+        variant_sel.on_value_change(lambda e: on_variant_change(e.value))
 
-            # Get current name
-            name_raw = (name_sel.value or "").strip()
-            name_part = name_raw.split(" — ")[0].strip() if " — " in name_raw else name_raw
-
-            key = (name_part, v_part)
-            if key in variant_map:
-                variant_label_in.value = variant_map[key][0]
-
-        variant_sel.on_value_change(lambda e: on_variant_change(e.value or ""))
-
-        # Trigger initial variant population if editing
+        # Populate variants immediately when editing
         if existing_ex:
-            on_name_change(name_option(existing_ex.name, existing_ex.label))
+            variant_sel.options = variants_for_name.get(existing_ex.name, [])
+            variant_sel.update()
 
         ui.element("div").classes("spacer-sm")
 
-        # ── Row 3: sets / reps / rest ─────────────────────────────────────
         with ui.row().classes("w-full items-center gap-2 flex-wrap"):
-            sets_in = number_field(
-                "Sets", value=existing_ex.sets if existing_ex else 3, min=1, max=100, suffix="sets"
+            ui.label("After resting ").classes("text-[10px] text-gray-500")
+            rest_before_in = number_field(
+                "Rest before (s)",
+                value=existing_ex.rest_before if existing_ex else 0,
+                min=1,
+                max=100,
+                suffix="seconds",
             ).classes("flex-1")
-            with ui.element("div").classes("flex-1"):
-                with ui.row().classes("w-full"):
+
+            ui.label(": Do ").classes("text-[10px] text-gray-500")
+
+            sets_in = number_field(
+                "Sets",
+                value=existing_ex.sets if existing_ex else 3,
+                min=1,
+                max=100,
+                suffix="sets",
+            ).classes("flex-1")
+
+            ui.label(" of either ").classes("text-[10px] text-gray-500")
+
+            with ui.row().classes("flex-1 items-center gap-2 no-wrap"):
+                with ui.column():
+                    ui.label("⎧").classes("text-xl text-gray-500")
+                    ui.label("⎩").classes("text-xl text-gray-500")
+
+                with ui.column().classes("w-full gap-1"):
                     reps_in = number_field(
                         "Reps",
                         value=existing_ex.reps if existing_ex else 10,
                         min=1,
                         max=200,
                         suffix="reps",
-                    ).classes("flex-1")
-                with ui.row().classes("w-full"):
-                    ui.label("OR")
-                with ui.row().classes("w-full"):
+                    ).classes("w-full")
+
                     duration_in = number_field(
                         "Duration (s)",
                         value=existing_ex.duration if existing_ex else 0,
                         min=1,
                         max=999,
                         suffix="seconds",
-                    ).classes("flex-1")
-            ui.label("with ")
+                    ).classes("w-full")
+
+            ui.label("with").classes("text-xs text-gray-500")
             rest_in = number_field(
                 "Rest (s)",
                 value=existing_ex.rest_seconds if existing_ex else 90,
                 min=0,
                 max=3600,
-                suffix="rest",
+                suffix="seconds",
             ).classes("flex-1")
+            ui.label(" rest").classes("text-xs text-gray-500")
 
-        ui.element("div").classes("spacer-sm")
-
-        # ── Save ──────────────────────────────────────────────────────────
         def save() -> None:
-            name_raw = (name_sel.value or "").strip()
-            name_part = name_raw.split(" — ")[0].strip() if " — " in name_raw else name_raw
+            name = (name_sel.value or "").strip()
+            variant = (variant_sel.value or "").strip() or None
 
-            if not name_part:
+            if not name:
                 ui.notify("Exercise name is required", color="negative")
                 return
 
-            if reps_in.value !=0 and duration_in.value !=0:
+            if reps_in.value != 0 and duration_in.value != 0:
                 ui.notify("You can only fill reps OR duration", color="negative")
                 return
 
             label = label_in.value.strip()
-            variant_raw = (variant_sel.value or "").strip()
-            variant_part = (
-                variant_raw.split(" — ")[0].strip() if " — " in variant_raw else variant_raw
-            )
-            variant = variant_part or None
             variant_label = variant_label_in.value.strip()
 
-            # Check if this exact definition exists in library
+            # Create library entry if (name, variant) is new
             match = next(
-                (d for d in library if d.name == name_part and d.variant == variant),
+                (d for d in library if d.name == name and d.variant == variant),
                 None,
             )
-
             if match is None:
-                # Create new definition in the library
                 new_defn = ExerciseDefinition(
-                    name=name_part,
+                    name=name,
                     label=label,
                     variant=variant,
                     variant_label=variant_label,
@@ -338,13 +318,14 @@ def _show_exercise_form(
                 ui.notify(f"'{new_defn.display_name}' added to library", color="info")
 
             ex = SessionExercise(
-                name=name_part,
+                name=name,
                 label=label,
                 variant=variant,
                 variant_label=variant_label,
                 sets=int(sets_in.value or 3),
                 reps=int(reps_in.value or 10),
                 duration=int(duration_in.value or 0),
+                rest_before=int(rest_before_in.value or 0),
                 rest_seconds=int(rest_in.value or 90),
             )
 
@@ -365,7 +346,6 @@ def _show_exercise_form(
         with ui.row().classes("items-center gap-2"):
             btn_primary("Save", on_click=save)
             btn_ghost("Cancel", on_click=form_card_el.delete)
-
 
 # ---------------------------------------------------------------------------
 # Helpers

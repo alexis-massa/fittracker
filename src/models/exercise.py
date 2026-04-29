@@ -21,14 +21,16 @@ class ExerciseDefinition:
     @property
     def display_name(self) -> str:
         """Full human-readable name: 'A — Pushup / 1 — Wide'"""
-        parts = [self.name]
+        name = self.name
+        variant = ""
         if self.label:
-            parts.append(f"— {self.label}")
+            name += f"— {self.label}"
         if self.variant:
-            parts.append(f"/ {self.variant}")
+            variant_parts = self.variant
             if self.variant_label:
-                parts.append(f"— {self.variant_label}")
-        return " ".join(parts)
+                variant_parts += f" — {self.variant_label}"
+            variant = f" [{variant_parts}]"
+        return f"{name}{variant}"
 
     @property
     def short_name(self) -> str:
@@ -59,7 +61,8 @@ class SessionExercise:
     sets: int
     reps: int
     duration: int
-    rest_seconds: int = 90
+    rest_seconds: int
+    rest_before: int
     variant: str | None = None
     label: str = ""
     variant_label: str = ""
@@ -89,6 +92,7 @@ class SessionExercise:
             sets=doc.get("sets", 3),
             reps=doc.get("reps", 10),
             duration=doc.get("duration", 0),
+            rest_before=doc.get("rest_before", 0),
             rest_seconds=doc.get("rest_seconds", 90),
         )
 
@@ -105,6 +109,7 @@ class SessionExercise:
             sets=3,
             reps=10,
             duration=0,
+            rest_before=0,
             rest_seconds=90,
         )
 
