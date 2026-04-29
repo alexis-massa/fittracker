@@ -40,30 +40,32 @@ def render(session_id: str | None, navigate: Callable[..., None]) -> None:
 
         section_title("Session info")
         with form_card(), ui.row().classes("w-full items-center gap-4 flex-wrap"):
-            date_in = date_field("Date", value=existing.date if existing else None)
+            date_in = date_field("Date", value=existing.date if existing else None).classes(
+                "flex-1"
+            )
             weight_in = number_field(
                 "Weight (kg)",
                 value=existing.weight if existing and existing.weight is not None else 0.0,
                 min=0,
                 max=999,
                 step=0.1,
-            )
+            ).classes("flex-1")
             energy_in = select_field(
                 "Energy",
                 options=_ENERGY_OPTIONS,
                 value=existing.energy_level.value
                 if existing and existing.energy_level
                 else EnergyLevel.MEDIUM.value,
-            )
+            ).classes("flex-1")
             progress_in = select_field(
                 "Progress",
                 options=_PROGRESS_OPTIONS,
                 value=existing.progress.value if existing else ProgressEnum.MAINTAIN.value,
-            )
+            ).classes("flex-1")
             notes_in = textarea_field(
                 "Notes",
                 value=existing.notes if existing and existing.notes is not None else "",
-            )
+            ).classes("flex-1")
 
         _exercise_group("Warmup", warmup_exs)
         _exercise_group("Workout", workout_exs)
@@ -95,7 +97,7 @@ def render(session_id: str | None, navigate: Callable[..., None]) -> None:
 
 def _exercise_group(title: str, ex_list: list[SessionExercise]) -> None:
     section_title(title)
-    container = ui.column().classes("w-full").style("gap:0")
+    container = ui.column().classes("w-full")
 
     def refresh() -> None:
         container.clear()
@@ -124,9 +126,8 @@ def _exercise_row(
     with (
         ui.row()
         .classes("w-full items-center gap-2")
-        .style("padding:0.35rem 0;border-bottom:1px solid var(--border)")
     ):
-        with ui.column().style("gap:0"):
+        with ui.column():
             ui.button(
                 icon="expand_less", on_click=lambda idx=index: _move(ex_list, idx, -1, refresh)
             ).classes("btn-reorder")
@@ -184,9 +185,8 @@ def _show_exercise_form(
     with container, ui.card().classes("card-inline") as form_card_el:
         ui.label("Edit Exercise" if existing_ex else "Add Exercise").classes("inline-form-title")
 
-        # ── Row 1: name + label ───────────────────────────────────────────
         with ui.row().classes("w-full items-center gap-2 flex-wrap"):
-            # Name — select with free input
+            # ── Row 1: name + label ───────────────────────────────────────────
             name_sel = ui.select(
                 options=name_options,
                 value=name_option(existing_ex.name, existing_ex.label) if existing_ex else None,
@@ -198,33 +198,28 @@ def _show_exercise_form(
             label_in = input_field(
                 "Name (e.g. Pushup)",
                 value=existing_ex.label if existing_ex else "",
-            ).classes("flex-1")
+            ).classes("flex-1 nicegui-input")
 
-        ui.element("div").classes("spacer-sm")
+            # ── Row 2: variant + variant_label ───────────────────────────────
+            variant_options: list[str] = []  # populated when name is chosen
 
-        # ── Row 2: variant + variant_label ───────────────────────────────
-        variant_options: list[str] = []  # populated when name is chosen
+            def variant_option(v: str, vl: str) -> str:
+                return f"{v} — {vl}" if vl else v
 
-        def variant_option(v: str, vl: str) -> str:
-            return f"{v} — {vl}" if vl else v
+            variant_sel = ui.select(
+                options=variant_options,
+                value=variant_option(existing_ex.variant, existing_ex.variant_label)
+                if existing_ex and existing_ex.variant
+                else None,
+                label="Variant (e.g. 1)",
+                new_value_mode="add-unique",
+                clearable=True,
+            ).classes("flex-1 nicegui-select")
 
-        variant_sel = ui.select(
-            options=variant_options,
-            value=variant_option(existing_ex.variant, existing_ex.variant_label)
-            if existing_ex and existing_ex.variant
-            else None,
-            label="Variant (e.g. 1)",
-            new_value_mode="add-unique",
-            clearable=True,
-        ).classes("flex-1 nicegui-select")
-
-        variant_label_in = input_field(
-            "Variant name (e.g. Wide)",
-            value=existing_ex.variant_label if existing_ex else "",
-        ).classes("flex-1")
-
-        with ui.row().classes("w-full items-center gap-2 flex-wrap"):
-            ui.element("div")  # placeholder so variant_sel and label are built before row
+            variant_label_in = input_field(
+                "Variant name (e.g. Wide)",
+                value=existing_ex.variant_label if existing_ex else "",
+            ).classes("flex-1 nicegui-input")
 
         # When name changes, refresh variant options and auto-fill label
         def on_name_change(value: str) -> None:
@@ -272,13 +267,34 @@ def _show_exercise_form(
         # ── Row 3: sets / reps / rest ─────────────────────────────────────
         with ui.row().classes("w-full items-center gap-2 flex-wrap"):
             sets_in = number_field(
-                "Sets", value=existing_ex.sets if existing_ex else 3, min=1, max=100
+                "Sets", value=existing_ex.sets if existing_ex else 3, min=1, max=100, suffix="sets"
             ).classes("flex-1")
-            reps_in = number_field(
-                "Reps", value=existing_ex.reps if existing_ex else 10, min=1, max=200
-            ).classes("flex-1")
+            with ui.element("div").classes("flex-1"):
+                with ui.row().classes("w-full"):
+                    reps_in = number_field(
+                        "Reps",
+                        value=existing_ex.reps if existing_ex else 10,
+                        min=1,
+                        max=200,
+                        suffix="reps",
+                    ).classes("flex-1")
+                with ui.row().classes("w-full"):
+                    ui.label("OR")
+                with ui.row().classes("w-full"):
+                    duration_in = number_field(
+                        "Duration (s)",
+                        value=existing_ex.duration if existing_ex else 0,
+                        min=1,
+                        max=999,
+                        suffix="seconds",
+                    ).classes("flex-1")
+            ui.label("with ")
             rest_in = number_field(
-                "Rest (s)", value=existing_ex.rest_seconds if existing_ex else 90, min=0, max=3600
+                "Rest (s)",
+                value=existing_ex.rest_seconds if existing_ex else 90,
+                min=0,
+                max=3600,
+                suffix="rest",
             ).classes("flex-1")
 
         ui.element("div").classes("spacer-sm")
@@ -290,6 +306,10 @@ def _show_exercise_form(
 
             if not name_part:
                 ui.notify("Exercise name is required", color="negative")
+                return
+
+            if reps_in.value !=0 and duration_in.value !=0:
+                ui.notify("You can only fill reps OR duration", color="negative")
                 return
 
             label = label_in.value.strip()
@@ -324,6 +344,7 @@ def _show_exercise_form(
                 variant_label=variant_label,
                 sets=int(sets_in.value or 3),
                 reps=int(reps_in.value or 10),
+                duration=int(duration_in.value or 0),
                 rest_seconds=int(rest_in.value or 90),
             )
 

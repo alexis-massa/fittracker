@@ -58,6 +58,7 @@ class SessionExercise:
     name: str
     sets: int
     reps: int
+    duration: int
     rest_seconds: int = 90
     variant: str | None = None
     label: str = ""
@@ -87,6 +88,7 @@ class SessionExercise:
             variant_label=doc.get("variant_label", ""),
             sets=doc.get("sets", 3),
             reps=doc.get("reps", 10),
+            duration=doc.get("duration", 0),
             rest_seconds=doc.get("rest_seconds", 90),
         )
 
@@ -102,6 +104,7 @@ class SessionExercise:
             variant_label=defn.variant_label,
             sets=3,
             reps=10,
+            duration=0,
             rest_seconds=90,
         )
 
