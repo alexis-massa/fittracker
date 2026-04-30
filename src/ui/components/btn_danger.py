@@ -6,4 +6,4 @@ from nicegui import ui
 
 
 def btn_danger(label: str, on_click: Callable[..., Any]) -> ui.button:
-    return ui.button(label, on_click=on_click).classes("btn-danger")
+    return ui.button(label, on_click=on_click, color="red").props("outline rounded")

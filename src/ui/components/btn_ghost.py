@@ -6,4 +6,4 @@ from nicegui import ui
 
 
 def btn_ghost(label: str, on_click: Callable[..., Any]) -> ui.button:
-    return ui.button(label, on_click=on_click).classes("btn-ghost")
+    return ui.button(label, on_click=on_click, color="secondary").props("outline rounded")

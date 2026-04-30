@@ -97,97 +97,6 @@ body {
     margin: 1.5rem 0;
 }
 
-/* ── Theme toggle ───────────────────────────────────────────────────────── */
-
-.theme-toggle {
-    background: none !important;
-    border: 1px solid var(--border-mid) !important;
-    border-radius: 50% !important;
-    box-shadow: none !important;
-    color: var(--text-muted) !important;
-    min-width: 0 !important;
-    width: 34px !important;
-    height: 34px !important;
-    padding: 0 !important;
-    transition: border-color 0.15s, color 0.15s !important;
-}
-.theme-toggle:hover {
-    border-color: var(--border-hover) !important;
-    color: var(--text) !important;
-}
-
-/* ── Navigation ─────────────────────────────────────────────────────────── */
-
-.nav-btn {
-    background: none !important;
-    border: none !important;
-    box-shadow: none !important;
-    color: var(--text-dim) !important;
-    font-family: 'DM Mono', monospace !important;
-    font-size: 0.72rem !important;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    cursor: pointer;
-    padding: 4px 0 !important;
-    border-bottom: 1px solid transparent !important;
-    border-radius: 0 !important;
-    transition: color 0.15s, border-color 0.15s;
-}
-.nav-btn:hover { color: var(--text-muted) !important; }
-.nav-btn.active {
-    color: var(--accent) !important;
-    border-bottom-color: var(--accent) !important;
-}
-
-/* ── Buttons ────────────────────────────────────────────────────────────── */
-
-.btn-primary {
-    background: var(--accent) !important;
-    color: var(--bg) !important;
-    font-family: 'DM Mono', monospace !important;
-    font-size: 0.72rem !important;
-    font-weight: 500 !important;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    border-radius: 3px !important;
-    padding: 6px 18px !important;
-    border: none !important;
-    box-shadow: none !important;
-    transition: opacity 0.15s !important;
-}
-.btn-primary:hover { opacity: 0.82 !important; }
-
-.btn-ghost {
-    background: transparent !important;
-    color: var(--text-dim) !important;
-    font-family: 'DM Mono', monospace !important;
-    font-size: 0.72rem !important;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    border: 1px solid var(--border-mid) !important;
-    border-radius: 3px !important;
-    padding: 6px 14px !important;
-    box-shadow: none !important;
-    transition: border-color 0.15s, color 0.15s !important;
-}
-.btn-ghost:hover {
-    border-color: var(--border-hover) !important;
-    color: var(--text) !important;
-}
-
-.btn-danger {
-    background: transparent !important;
-    color: var(--danger) !important;
-    font-family: 'DM Mono', monospace !important;
-    font-size: 0.68rem !important;
-    border: 1px solid var(--danger-border) !important;
-    border-radius: 3px !important;
-    padding: 4px 10px !important;
-    box-shadow: none !important;
-    transition: border-color 0.15s !important;
-}
-.btn-danger:hover { border-color: var(--danger) !important; }
-
 /* ── Cards ──────────────────────────────────────────────────────────────── */
 
 .card {
@@ -352,27 +261,6 @@ body {
     font-size: 0.85rem;
     font-weight: 500;
 }
-
-/* ── Reorder buttons ────────────────────────────────────────────────────── */
-
-.reorder-btns {
-    gap: 0;
-}
-
-.btn-reorder {
-    background: none !important;
-    border: none !important;
-    box-shadow: none !important;
-    color: var(--text-dimmer) !important;
-    padding: 0 !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-    height: 18px !important;
-    width: 24px !important;
-    font-size: 0.7rem !important;
-    transition: color 0.15s !important;
-}
-.btn-reorder:hover { color: var(--text) !important; }
 
 /* ── Labels & tags ──────────────────────────────────────────────────────── */
 

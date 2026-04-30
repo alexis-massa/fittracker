@@ -16,4 +16,4 @@ def theme_toggle(dark: ui.dark_mode) -> None:
             preferences.update({"dark_mode": True})
 
     initial_icon = "dark_mode" if preferences.current.dark_mode else "light_mode"
-    btn = ui.button(icon=initial_icon, on_click=toggle).classes("theme-toggle")
+    btn = ui.button(icon=initial_icon, on_click=toggle).props("outline round")

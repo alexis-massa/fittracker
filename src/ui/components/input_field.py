@@ -5,4 +5,4 @@ from nicegui import ui
 
 
 def input_field(label: str, value: str = "", **kwargs: Any) -> ui.input:
-    return ui.input(label, value=value, **kwargs)
+    return ui.input(label, value=value, **kwargs).classes("nicegui-input")

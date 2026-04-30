@@ -6,4 +6,4 @@ from nicegui import ui
 
 
 def btn_primary(label: str, on_click: Callable[..., Any]) -> ui.button:
-    return ui.button(label, on_click=on_click).classes("btn-primary")
+    return ui.button(label, on_click=on_click, color="white").props("outline rounded")

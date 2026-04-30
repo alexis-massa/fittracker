@@ -81,7 +81,7 @@ def build_layout() -> None:
     with ui.row().classes("app-header w-full"):
         ui.label("FitTracker").classes("app-title")
         for label, page in [("Sessions", "sessions"), ("Exercises", "exercises")]:
-            btn = ui.button(label, on_click=lambda p=page: navigate(str(p))).classes("nav-btn")
+            btn = ui.button(label, on_click=lambda p=page: navigate(str(p))).props("outline")
             _nav_buttons[page] = btn
         with ui.row().classes("ml-auto"):
             theme_toggle(dark)
