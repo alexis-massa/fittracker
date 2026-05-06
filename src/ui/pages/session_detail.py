@@ -28,7 +28,6 @@ def render(session_id: str | None, navigate: Callable[..., None]) -> None:
         ui.element("div").classes("spacer-sm")
         page_title(f"Session — {s.date}")
 
-        # ── Meta ─────────────────────────────────────────────────────────
         energy_str = s.energy_level.name.replace("_", " ").title() if s.energy_level else "—"
         with ui.row().classes("items-center gap-6 flex-wrap").style("margin-bottom:1.5rem"):
             ui.label(f"Energy: {energy_str}").classes("meta-row")
@@ -72,9 +71,12 @@ def _exercise_row(ex: SessionExercise, dim: bool = False) -> None:
         ui.column().classes("flex-1").style("gap:3px"),
     ):
         with ui.row().classes("items-center gap-2"):
-            ui.label(ex.name).classes("card-title")
-            if ex.variant:
-                tag(ex.variant, accent=True)
+            ui.label(ex.short_name).classes("card-title")
+            if ex.variant_name:
+                tag(ex.variant_name, accent=True)
+            if ex.label or ex.variant_label:
+                desc = " / ".join(filter(None, [ex.label, ex.variant_label]))
+                ui.label(desc).classes("meta-row").style("margin-top:0")
         ui.label(f"{ex.sets} sets · {ex.reps} reps · {ex.rest_seconds}s rest").classes("meta-row")
 
 

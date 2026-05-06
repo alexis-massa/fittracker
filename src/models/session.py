@@ -31,9 +31,9 @@ class Session:
     notes: str | None = None
     energy_level: EnergyLevel | None = None
     progress: ProgressEnum = ProgressEnum.MAINTAIN
-    warmup: list[SessionExercise] = field(default_factory=list)
-    workout: list[SessionExercise] = field(default_factory=list)
-    stretches: list[SessionExercise] = field(default_factory=list)
+    warmup: list[SessionExercise] = field(default_factory=list[SessionExercise])
+    workout: list[SessionExercise] = field(default_factory=list[SessionExercise])
+    stretches: list[SessionExercise] = field(default_factory=list[SessionExercise])
     _id: str = field(default="", repr=False)
 
     @property

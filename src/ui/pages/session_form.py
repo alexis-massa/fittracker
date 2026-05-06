@@ -5,8 +5,8 @@ from nicegui import ui
 
 from src.models import session as session_model
 from src.models.exercise import ExerciseDefinition
+from src.models.exercise import ExerciseVariant
 from src.models.exercise import SessionExercise
-from src.models.exercise import create as create_definition
 from src.models.exercise import get_all as get_library
 from src.models.session import EnergyLevel
 from src.models.session import ProgressEnum
@@ -17,12 +17,12 @@ from src.ui.components import btn_ghost
 from src.ui.components import btn_primary
 from src.ui.components import date_field
 from src.ui.components import form_card
-from src.ui.components import input_field
 from src.ui.components import number_field
 from src.ui.components import page_title
 from src.ui.components import section_title
 from src.ui.components import select_field
 from src.ui.components import textarea_field
+from src.ui.pages.exercise_create_form import exercise_create_form
 
 _ENERGY_OPTIONS: dict[int, str] = {e.value: e.name.replace("_", " ").title() for e in EnergyLevel}
 _PROGRESS_OPTIONS: dict[str, str] = {p.value: p.value.title() for p in ProgressEnum}
@@ -107,8 +107,7 @@ def _exercise_group(title: str, ex_list: list[SessionExercise]) -> None:
 
     refresh()
     btn_ghost(
-        "+ Add exercise",
-        on_click=lambda: _show_exercise_form(None, ex_list, container, refresh),
+        "+ Add exercise", on_click=lambda: _show_exercise_form(None, ex_list, container, refresh)
     )
 
 
@@ -142,49 +141,9 @@ def _exercise_row(
                 "meta-row"
             )
         btn_ghost(
-            "Edit",
-            on_click=lambda idx=index: _show_exercise_form(idx, ex_list, container, refresh),
+            "Edit", on_click=lambda idx=index: _show_exercise_form(idx, ex_list, container, refresh)
         )
         btn_danger("×", on_click=lambda idx=index: _remove(ex_list, idx, refresh))
-
-
-# ---------------------------------------------------------------------------
-# Canonical inline exercise creation form.
-# Renders into `parent`. Calls `on_done(new_defn)` after successful creation.
-# Can be reused from anywhere — session form, exercise page, etc.
-# ---------------------------------------------------------------------------
-
-
-def _exercise_create_form(
-    parent: ui.element, on_done: Callable[[ExerciseDefinition], None]
-) -> None:
-    with parent, form_card() as create_card:
-        ui.label("New Exercise").classes("inline-form-title")
-
-        def create() -> None:
-            name = dn_in.value.strip()
-            if not name:
-                ui.notify("Name is required", color="negative")
-                return
-            new_defn = ExerciseDefinition(
-                name=name,
-                label=dl_in.value.strip(),
-                variant=dv_in.value.strip() or None,
-                variant_label=dvl_in.value.strip(),
-            )
-            create_definition(new_defn)
-            ui.notify(f"'{new_defn.display_name}' added to library", color="positive")
-            create_card.delete()
-            on_done(new_defn)
-
-        with ui.row().classes("w-full items-center gap-2 flex-wrap"):
-            dn_in = input_field("Name (e.g. A)").classes("flex-1")
-            dl_in = input_field("Label (e.g. Pushup)").classes("flex-1")
-            dv_in = input_field("Variant (e.g. 1)").classes("flex-1")
-            dvl_in = input_field("Variant label (e.g. Wide)").classes("flex-1")
-
-            btn_primary("Create", on_click=create)
-            btn_ghost("Cancel", on_click=create_card.delete)
 
 
 # ---------------------------------------------------------------------------
@@ -199,33 +158,25 @@ def _show_exercise_form(
     refresh: Callable[[], None],
 ) -> None:
     existing_ex = ex_list[edit_index] if edit_index is not None else None
-
     library = get_library()
 
-    name_to_label: dict[str, str] = {}
+    # name → (label, list of ExerciseVariant)
+    lib_map: dict[str, tuple[str, list[ExerciseVariant]]] = {}
     for d in library:
-        if d.name not in name_to_label:
-            name_to_label[d.name] = d.label
-
-    variants_for: dict[str, dict[str, str]] = {}
-    for d in library:
-        if d.variant is not None:
-            variants_for.setdefault(d.name, {})[d.variant] = d.variant_label
+        lib_map[d.name] = (d.label, d.variants)
 
     def name_opts() -> dict[str, str]:
-        return {n: f"{n} — {label}" if label else n for n, label in name_to_label.items()}
+        return {n: f"{n} — {lbl}" if lbl else n for n, (lbl, _) in lib_map.items()}
 
     def variant_opts(name: str) -> dict[str, str]:
-        return {v: f"{v} — {vl}" if vl else v for v, vl in variants_for.get(name, {}).items()}
+        _, variants = lib_map.get(name, ("", []))
+        return {v.name: v.display_name for v in variants}
 
     with container, form_card() as form_card_el:
         ui.label("Edit Exercise" if existing_ex else "Add Exercise").classes("inline-form-title")
-        ui.link("+ Create new exercise", target="#").on("click", lambda _: show_create()).classes(
-            "meta-row"
-        ).style("cursor:pointer;color:var(--accent);text-decoration:none")
 
-        # Slot for the inline create form — expands below, collapses on done/cancel
-        create_slot = ui.element().classes("w-full")
+        create_slot = ui.column().classes("w-full")
+
         with ui.row().classes("w-full items-center gap-2 flex-wrap"):
             name_sel = ui.select(
                 options=name_opts(),
@@ -236,36 +187,37 @@ def _show_exercise_form(
 
             variant_sel = ui.select(
                 options=variant_opts(existing_ex.name) if existing_ex else {},
-                value=existing_ex.variant if existing_ex and existing_ex.variant else None,
+                value=existing_ex.variant_name
+                if existing_ex and existing_ex.variant_name
+                else None,
                 label="Variant",
                 clearable=True,
             ).classes("flex-1 nicegui-select")
 
-            def on_name_change(value: str | None) -> None:
-                name = value or ""
-                variant_sel.options = variant_opts(name)
-                variant_sel.value = None
-                variant_sel.update()
+        def on_name_change(value: str | None) -> None:
+            name = value or ""
+            variant_sel.options = variant_opts(name)
+            variant_sel.value = None
+            variant_sel.update()
 
-            name_sel.on_value_change(lambda e: on_name_change(e.value))
+        name_sel.on_value_change(lambda e: on_name_change(e.value))
 
-            def on_exercise_created(new_defn: ExerciseDefinition) -> None:
-                for d in get_library():
-                    if d.name not in name_to_label:
-                        name_to_label[d.name] = d.label
-                    if d.variant is not None:
-                        variants_for.setdefault(d.name, {})[d.variant] = d.variant_label
-                name_sel.options = name_opts()
-                name_sel.value = new_defn.name
-                name_sel.update()
-                on_name_change(new_defn.name)
-                if new_defn.variant:
-                    variant_sel.value = new_defn.variant
-                    variant_sel.update()
+        def on_exercise_created(new_defn: ExerciseDefinition) -> None:
+            lib_map[new_defn.name] = (new_defn.label, new_defn.variants)
+            name_sel.options = name_opts()
+            name_sel.value = new_defn.name
+            name_sel.update()
+            on_name_change(new_defn.name)
 
-            def show_create() -> None:
-                create_slot.clear()
-                _exercise_create_form(create_slot, on_exercise_created)
+        def show_create() -> None:
+            create_slot.clear()
+            exercise_create_form(create_slot, on_exercise_created)
+
+        ui.link("+ Create new exercise", target="#").on("click", lambda _: show_create()).classes(
+            "meta-row"
+        ).style("cursor:pointer;color:var(--accent);text-decoration:none")
+
+        ui.element("div").classes("spacer-sm")
 
         with ui.row().classes("w-full items-center gap-2 flex-wrap"):
             ui.label("After resting ").classes("text-sm text-gray-500")
@@ -276,19 +228,11 @@ def _show_exercise_form(
                 max=100,
                 suffix="seconds",
             ).classes("flex-1")
-
             ui.label(": Do ").classes("text-sm text-gray-500")
-
             sets_in = number_field(
-                "Sets",
-                value=existing_ex.sets if existing_ex else 3,
-                min=1,
-                max=100,
-                suffix="sets",
+                "Sets", value=existing_ex.sets if existing_ex else 3, min=1, max=100, suffix="sets"
             ).classes("flex-1")
-
             ui.label(" of either ").classes("text-sm text-gray-500")
-
             with ui.row().classes("flex-1 items-center gap-2 no-wrap"):
                 with ui.column():
                     ui.label("⎧").classes("text-xl text-gray-500")
@@ -308,7 +252,6 @@ def _show_exercise_form(
                         max=999,
                         suffix="seconds",
                     ).classes("w-full")
-
             ui.label("with").classes("text-sm text-gray-500")
             rest_in = number_field(
                 "Rest (s)",
@@ -321,21 +264,27 @@ def _show_exercise_form(
 
         def save() -> None:
             name = (name_sel.value or "").strip()
-            variant = (variant_sel.value or "").strip() or None
+            variant_name = (variant_sel.value or "").strip() or None
 
             if not name:
                 ui.notify("Exercise name is required", color="negative")
                 return
-
             if reps_in.value != 0 and duration_in.value != 0:
                 ui.notify("Fill Reps OR Duration — not both", color="negative")
                 return
 
+            lbl, variants = lib_map.get(name, ("", []))
+            chosen_variant = (
+                next((v for v in variants if v.name == variant_name), None)
+                if variant_name
+                else None
+            )
+
             ex = SessionExercise(
                 name=name,
-                label=name_to_label.get(name, ""),
-                variant=variant,
-                variant_label=variants_for.get(name, {}).get(variant or "", ""),
+                label=lbl,
+                variant_name=chosen_variant.name if chosen_variant else "",
+                variant_label=chosen_variant.label if chosen_variant else "",
                 sets=int(sets_in.value or 3),
                 reps=int(reps_in.value or 10),
                 duration=int(duration_in.value or 0),

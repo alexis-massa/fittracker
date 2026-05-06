@@ -20,7 +20,6 @@ _NAV_OWNERSHIP: dict[str, str] = {
     "session_detail": "sessions",
     "session_form": "sessions",
     "exercises": "exercises",
-    "exercise_form": "exercises",
 }
 
 

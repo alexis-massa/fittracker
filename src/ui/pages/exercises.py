@@ -4,22 +4,49 @@ from collections.abc import Callable
 from nicegui import ui
 
 from src.models import exercise as exercise_model
+from src.models.exercise import ExerciseDefinition
 from src.ui.components import btn_danger
 from src.ui.components import btn_ghost
 from src.ui.components import btn_primary
 from src.ui.components import page_header_row
 from src.ui.components import page_title
 from src.ui.components import section_title
+from src.ui.pages.exercise_create_form import exercise_create_form
 from src.utils.formatting import pluralize
 
 
 def render(navigate: Callable[..., None]) -> None:
-    exercises = exercise_model.get_all()
-
     with ui.column().classes("page-content"):
+        # ── Header + toggleable create form ───────────────────────────────
+        create_slot = ui.column().classes("w-full")
+        create_visible = {"value": False}
+
+        def toggle_create() -> None:
+            if create_visible["value"]:
+                create_slot.clear()
+                create_visible["value"] = False
+            else:
+                create_visible["value"] = True
+
+                def on_done(defn: ExerciseDefinition) -> None:
+                    create_visible["value"] = False
+                    navigate("exercises")
+
+                def on_cancel() -> None:
+                    create_slot.clear()
+                    create_visible["value"] = False
+
+                exercise_create_form(create_slot, on_done=on_done, on_cancel=on_cancel)
+
         with page_header_row():
             page_title("Exercise Library")
-            btn_primary("+ New Exercise", on_click=lambda: navigate("exercise_form"))
+            btn_primary("+ New Exercise", on_click=toggle_create)
+
+        # Form expands here, above the list
+        # (create_slot is already in the column, declared before page_header_row)
+
+        # ── Exercise list ─────────────────────────────────────────────────
+        exercises = exercise_model.get_all()
 
         if not exercises:
             ui.label("No exercises yet. Add your first one.").classes("meta-row")
@@ -28,20 +55,16 @@ def render(navigate: Callable[..., None]) -> None:
         section_title(pluralize(len(exercises), "exercise"))
 
         for ex in exercises:
-            eid = ex._id
             with ui.row().classes("card items-center justify-between"):
                 with ui.column().style("gap:2px"):
-                    with ui.row().classes("items-center gap-2"):
-                        ui.label(ex.short_name).classes("card-title")
-                        if ex.label:
-                            ui.label(ex.label).classes("meta-row").style("margin-top:0")
-                    if ex.variant and ex.variant_label:
-                        ui.label(f"{ex.variant} — {ex.variant_label}").classes("meta-row")
-                    elif ex.variant:
-                        ui.label(f"Variant {ex.variant}").classes("meta-row")
+                    ui.label(ex.display_name).classes("card-title")
+                    if ex.variants:
+                        ui.label("  ·  ".join(v.display_name for v in ex.variants)).classes(
+                            "meta-row"
+                        )
                 with ui.row().classes("items-center gap-2"):
-                    btn_ghost("Edit", on_click=lambda eid_=eid: navigate("exercise_form", eid_))
-                    btn_danger("Delete", on_click=lambda eid_=eid: _delete(eid_, navigate))
+                    btn_ghost("Edit", on_click=lambda eid_=ex.id: navigate("exercise_form", eid_))
+                    btn_danger("Delete", on_click=lambda eid_=ex.id: _delete(eid_, navigate))
 
 
 def _delete(exercise_id: str, navigate: Callable[..., None]) -> None:
