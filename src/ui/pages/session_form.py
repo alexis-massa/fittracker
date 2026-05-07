@@ -136,7 +136,7 @@ def _exercise_row(
                 ui.label(ex.short_name).style("font-size:0.85rem;font-weight:600")
                 if ex.label or ex.variant_label:
                     desc = " / ".join(filter(None, [ex.label, ex.variant_label]))
-                    ui.label(desc).classes("meta-row").style("margin-top:0")
+                    ui.label(desc).classes("meta-row q-mt-none")
             ui.label(f"{ex.sets} sets · {ex.reps} reps · {ex.rest_seconds}s rest").classes(
                 "meta-row"
             )

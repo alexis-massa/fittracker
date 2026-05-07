@@ -8,7 +8,6 @@ from src.ui.components import btn_ghost
 from src.ui.components import btn_primary
 from src.ui.components import page_header_row
 from src.ui.components import page_title
-from src.ui.components import section_title
 from src.utils.formatting import pluralize
 
 
@@ -21,10 +20,9 @@ def render(navigate: Callable[..., None]) -> None:
             btn_primary("+ New Session", on_click=lambda: navigate("session_form"))
 
         if not sessions:
-            ui.label("No sessions yet. Log your first workout.").classes("meta-row")
-            return
-
-        section_title(pluralize(len(sessions), "session") + " logged")
+            ui.label("No sessions yet. Log your first workout.").classes("text-caption")
+        else:
+            ui.label(pluralize(len(sessions), "session") + " logged").classes("text-caption")
 
         for s in sessions:
             sid = s.id
