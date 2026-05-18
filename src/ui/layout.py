@@ -20,6 +20,7 @@ _NAV_OWNERSHIP: dict[str, str] = {
     "session_detail": "sessions",
     "session_form": "sessions",
     "exercises": "exercises",
+    "exercise_form": "exercises",
 }
 
 
@@ -68,7 +69,7 @@ def _rebuild_main() -> None:
         if renderer:
             renderer()
         else:
-            ui.label(f"Unknown page: {page}").style("color:#555")
+            ui.label(f"Unknown page: {page}").classes("text-grey")
 
 
 def build_layout() -> None:
@@ -78,12 +79,16 @@ def build_layout() -> None:
     ui.add_head_html(f"<style>{STYLES}</style>")
 
     with ui.row().classes("app-header w-full"):
-        ui.label("FitTracker").classes("app-title")
+        ui.label("FitTracker").classes("app-title text-primary")
         for label, page in [("Sessions", "sessions"), ("Exercises", "exercises")]:
-            btn = ui.button(label, on_click=lambda p=page: navigate(str(p))).props("outline")
+            btn = (
+                ui.button(label, on_click=lambda p=page: navigate(str(p)))
+                .props("flat no-caps")
+                .classes("nav-btn")
+            )
             _nav_buttons[page] = btn
-        with ui.row().classes("ml-auto"):
+        with ui.row().classes("q-ml-auto"):
             theme_toggle(dark)
 
-    _main_container["el"] = ui.column().classes("w-full").style("min-height:calc(100vh - 56px)")
+    _main_container["el"] = ui.column().classes("w-full")
     navigate("sessions")
