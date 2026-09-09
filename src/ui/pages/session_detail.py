@@ -54,6 +54,7 @@ def render(session_id: str | None) -> None:
         sid = s.id
         with ui.row().classes("items-center gap-2"):
             btn_ghost("Edit", on_click=lambda: ui.navigate.to(f"/sessions/{sid}/edit"))
+            btn_ghost("Duplicate", on_click=lambda: ui.navigate.to(f"/sessions/{sid}/duplicate"))
             btn_danger("Delete", on_click=lambda: _delete(sid))
 
 

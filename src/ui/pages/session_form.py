@@ -28,15 +28,20 @@ _ENERGY_OPTIONS: dict[int, str] = {e.value: e.name.replace("_", " ").title() for
 _PROGRESS_OPTIONS: dict[str, str] = {p.value: p.value.title() for p in ProgressEnum}
 
 
-def render(session_id: str | None) -> None:
+def render(session_id: str | None, duplicate_from: str | None = None) -> None:
     existing = session_model.get_by_id(session_id) if session_id else None
+    source = existing or (session_model.get_by_id(duplicate_from) if duplicate_from else None)
 
-    warmup_exs: list[SessionExercise] = list(existing.warmup if existing else [])
-    workout_exs: list[SessionExercise] = list(existing.workout if existing else [])
-    stretch_exs: list[SessionExercise] = list(existing.stretches if existing else [])
+    warmup_exs: list[SessionExercise] = list(source.warmup if source else [])
+    workout_exs: list[SessionExercise] = list(source.workout if source else [])
+    stretch_exs: list[SessionExercise] = list(source.stretches if source else [])
+
+    is_duplicate = existing is None and source is not None
 
     with ui.column().classes("page-content"):
-        page_title("Edit Session" if existing else "New Session")
+        page_title(
+            "Duplicate Session" if is_duplicate else ("Edit Session" if existing else "New Session")
+        )
 
         section_title("Session info")
         with form_card(), ui.row().classes("w-full items-center gap-4 flex-wrap"):
