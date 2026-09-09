@@ -6,6 +6,8 @@ appended automatically to `[Unreleased]` by a commit hook (see
 [README.md](README.md)); versions are cut and tagged on `main` by hand.
 
 ## [Unreleased]
+
+## [0.1.0] - 2026-09-09
 - ci: add GitHub Actions workflow for lint, type check, and tests
 - test: add pytest suite for models and utils layer
 - feat: mark invalid fields inline instead of only toasting
