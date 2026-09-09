@@ -2,6 +2,7 @@
 from collections.abc import Callable
 
 from nicegui import ui
+from nicegui.elements.mixins.validation_element import ValidationElement
 
 from src.models import session as session_model
 from src.models.exercise import ExerciseDefinition
@@ -330,12 +331,12 @@ def _show_exercise_form(
 # ---------------------------------------------------------------------------
 
 
-def _flag_error(field: ui.element, message: str) -> None:
-    field.props(f'error error-message="{message}"')
+def _flag_error(field: ValidationElement, message: str) -> None:
+    field.error = message
 
 
-def _clear_error(field: ui.element) -> None:
-    field.props(remove="error error-message")
+def _clear_error(field: ValidationElement) -> None:
+    field.error = None
 
 
 def _remove(ex_list: list[SessionExercise], index: int, refresh: Callable[[], None]) -> None:
