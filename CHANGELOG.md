@@ -6,5 +6,6 @@ appended automatically to `[Unreleased]` by a commit hook (see
 [README.md](README.md)); versions are cut and tagged on `main` by hand.
 
 ## [Unreleased]
+- fix: allow 0 for rest-before and duration in exercise form
 - chore: ignore .claude/worktrees/ (Claude Code agent scratch worktrees)
 - chore: add MIT license, changelog tooling, setup script, and rewrite README
