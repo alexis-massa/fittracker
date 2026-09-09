@@ -9,4 +9,6 @@ __pycache__/
 
 preferences.json
 
+.claude/worktrees/
+
 .DS_Store
