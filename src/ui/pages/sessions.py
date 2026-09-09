@@ -37,4 +37,11 @@ def render() -> None:
                         f"{energy_str} energy · "
                         f"{s.progress.value.title()}"
                     ).classes("text-caption opacity-70")
-                btn_ghost("View →", on_click=lambda sid_=sid: ui.navigate.to(f"/sessions/{sid_}"))
+                with ui.row().classes("items-center gap-2"):
+                    btn_ghost(
+                        "Duplicate",
+                        on_click=lambda sid_=sid: ui.navigate.to(f"/sessions/{sid_}/duplicate"),
+                    )
+                    btn_ghost(
+                        "View →", on_click=lambda sid_=sid: ui.navigate.to(f"/sessions/{sid_}")
+                    )

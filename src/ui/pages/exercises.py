@@ -7,6 +7,7 @@ from src.ui.components import btn_danger
 from src.ui.components import btn_ghost
 from src.ui.components import btn_primary
 from src.ui.components import card_row
+from src.ui.components import confirm_dialog
 from src.ui.components import page_header_row
 from src.ui.components import page_title
 from src.ui.components import section_title
@@ -66,10 +67,16 @@ def render() -> None:
                         "Edit",
                         on_click=lambda eid_=ex.id: ui.navigate.to(f"/exercises/{eid_}/edit"),
                     )
-                    btn_danger("Delete", on_click=lambda eid_=ex.id: _delete(eid_))
+                    btn_danger(
+                        "Delete",
+                        on_click=lambda eid_=ex.id, name_=ex.display_name: _delete(eid_, name_),
+                    )
 
 
-def _delete(exercise_id: str) -> None:
-    exercise_model.delete(exercise_id)
-    ui.notify("Exercise deleted")
-    ui.navigate.to("/exercises")
+def _delete(exercise_id: str, name: str) -> None:
+    def do_delete() -> None:
+        exercise_model.delete(exercise_id)
+        ui.notify("Exercise deleted")
+        ui.navigate.to("/exercises")
+
+    confirm_dialog(f"Delete '{name}' from the library? This cannot be undone.", do_delete)
