@@ -6,6 +6,7 @@ appended automatically to `[Unreleased]` by a commit hook (see
 [README.md](README.md)); versions are cut and tagged on `main` by hand.
 
 ## [Unreleased]
+- fix: correct grey-7 typo and outline input fields for consistency
 - fix: replace dead spacer/heading classes with Quasar utilities
 - fix: unify exercise-effort form styling and stack fields on mobile
 - fix: restore card containers and text hierarchy on list rows
