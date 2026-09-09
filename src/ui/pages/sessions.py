@@ -6,6 +6,7 @@ from nicegui import ui
 from src.models import session as session_model
 from src.ui.components import btn_ghost
 from src.ui.components import btn_primary
+from src.ui.components import card_row
 from src.ui.components import page_header_row
 from src.ui.components import page_title
 from src.utils.formatting import pluralize
@@ -28,14 +29,14 @@ def render(navigate: Callable[..., None]) -> None:
             sid = s.id
             energy_str = s.energy_level.name.replace("_", " ").title() if s.energy_level else "—"
 
-            with ui.row().classes("card align-center justify-between"):
+            with card_row(), ui.row().classes("w-full items-center justify-between"):
                 with ui.column().style("gap:3px"):
-                    ui.label(s.date).classes("card-title")
+                    ui.label(s.date).classes("text-subtitle1 text-weight-bold")
                     ui.label(
                         f"{pluralize(len(s.workout), 'exercise')} · "
                         f"{pluralize(len(s.warmup), 'warmup')} · "
                         f"{pluralize(len(s.stretches), 'stretch', 'stretches')} · "
                         f"{energy_str} energy · "
                         f"{s.progress.value.title()}"
-                    ).classes("meta-row")
+                    ).classes("text-caption opacity-70")
                 btn_ghost("View →", on_click=lambda sid_=sid: navigate("session_detail", sid_))

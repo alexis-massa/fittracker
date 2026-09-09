@@ -8,6 +8,7 @@ from src.models.exercise import ExerciseDefinition
 from src.ui.components import btn_danger
 from src.ui.components import btn_ghost
 from src.ui.components import btn_primary
+from src.ui.components import card_row
 from src.ui.components import page_header_row
 from src.ui.components import page_title
 from src.ui.components import section_title
@@ -49,18 +50,18 @@ def render(navigate: Callable[..., None]) -> None:
         exercises = exercise_model.get_all()
 
         if not exercises:
-            ui.label("No exercises yet. Add your first one.").classes("meta-row")
+            ui.label("No exercises yet. Add your first one.").classes("text-caption opacity-70")
             return
 
         section_title(pluralize(len(exercises), "exercise"))
 
         for ex in exercises:
-            with ui.row().classes("card items-center justify-between"):
+            with card_row(), ui.row().classes("w-full items-center justify-between"):
                 with ui.column().style("gap:2px"):
-                    ui.label(ex.display_name).classes("card-title")
+                    ui.label(ex.display_name).classes("text-subtitle1 text-weight-bold")
                     if ex.variants:
                         ui.label("  ·  ".join(v.display_name for v in ex.variants)).classes(
-                            "meta-row"
+                            "text-caption opacity-70"
                         )
                 with ui.row().classes("items-center gap-2"):
                     btn_ghost("Edit", on_click=lambda eid_=ex.id: navigate("exercise_form", eid_))
