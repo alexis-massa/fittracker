@@ -224,7 +224,7 @@ def _show_exercise_form(
             rest_before_in = number_field(
                 "Rest before (s)",
                 value=existing_ex.rest_before if existing_ex else 0,
-                min=1,
+                min=0,
                 max=100,
                 suffix="seconds",
             ).classes("flex-1")
@@ -248,7 +248,7 @@ def _show_exercise_form(
                     duration_in = number_field(
                         "Duration (s)",
                         value=existing_ex.duration if existing_ex else 0,
-                        min=1,
+                        min=0,
                         max=999,
                         suffix="seconds",
                     ).classes("w-full")
