@@ -1,0 +1,47 @@
+[project]
+name = "fittracker"
+version = "0.1.0"
+description = "A personal workout tracker: session logging and an exercise library, built with NiceGUI."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "lefthook>=2.1.6",
+    "nicegui>=3.10.0",
+    "pymongo>=4.17.0",
+    "python-dotenv>=1.2.2",
+]
+
+[dependency-groups]
+dev = [
+    "mongomock>=4.3.0",
+    "mypy>=1.20.2",
+    "pytest>=9.1.1",
+    "ruff>=0.15.11",
+]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15
+
+[tool.ruff.lint.isort]
+force-single-line = true
+force-sort-within-sections = true
+combine-as-imports = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

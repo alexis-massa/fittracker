@@ -1,0 +1,19 @@
+pre-commit:
+  parallel: true
+  commands:
+
+    ruff-format:
+      glob: "*.py"
+      run: uv run ruff format {staged_files}
+
+    ruff-lint:
+      glob: "*.py"
+      run: uv run ruff check --fix {staged_files}
+
+    mypy:
+      run: uv run mypy src
+
+post-commit:
+  commands:
+    changelog:
+      run: scripts/append-changelog.sh

@@ -1,0 +1,19 @@
+services:
+  mongo:
+    ports: !reset []
+
+  app:
+    ports: !reset []
+    environment:
+      APP_ENV: production
+    networks:
+      default:
+      web:
+        aliases:
+          - fittracker-app
+
+# A separate Caddy instance (from another compose project on the same Pi)
+# reverse proxies into this network to reach the app by its alias above.
+networks:
+  web:
+    external: true
