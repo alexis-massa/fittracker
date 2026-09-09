@@ -46,7 +46,7 @@ def render(exercise_id: str | None, navigate: Callable[..., None]) -> None:
             name_in = input_field("Name (e.g. A)", value=existing.name).classes("flex-1")
             label_in = input_field("Label (e.g. Pushup)", value=existing.label).classes("flex-1")
 
-        ui.element("div").classes("spacer-md")
+        ui.element("div").classes("q-mb-md")
         section_title("Variants")
 
         variants_container = ui.column().classes("w-full")
@@ -82,7 +82,7 @@ def render(exercise_id: str | None, navigate: Callable[..., None]) -> None:
 
         refresh_variants()
 
-        ui.element("div").classes("spacer-md")
+        ui.element("div").classes("q-mb-md")
         with action_row():
             btn_primary(
                 "Save", on_click=lambda: _save(exercise_id, name_in, label_in, variants, navigate)
