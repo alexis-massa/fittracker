@@ -5,6 +5,7 @@ from src.models import session as session_model
 from src.models.exercise import SessionExercise
 from src.ui.components import btn_danger
 from src.ui.components import btn_ghost
+from src.ui.components import btn_primary
 from src.ui.components import card_row
 from src.ui.components import confirm_dialog
 from src.ui.components import page_title
@@ -54,6 +55,7 @@ def render(session_id: str | None) -> None:
         ui.separator().classes("q-my-md")
         sid = s.id
         with ui.row().classes("items-center gap-2"):
+            btn_primary("Start", on_click=lambda: ui.navigate.to(f"/sessions/{sid}/run"))
             btn_ghost("Edit", on_click=lambda: ui.navigate.to(f"/sessions/{sid}/edit"))
             btn_ghost("Duplicate", on_click=lambda: ui.navigate.to(f"/sessions/{sid}/duplicate"))
             btn_danger("Delete", on_click=lambda: _delete(sid))

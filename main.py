@@ -11,6 +11,7 @@ from src.ui.pages.exercise_form import render as exercise_form_page
 from src.ui.pages.exercises import render as exercises_page
 from src.ui.pages.session_detail import render as session_detail_page
 from src.ui.pages.session_form import render as session_form_page
+from src.ui.pages.session_run import render as session_run_page
 from src.ui.pages.sessions import render as sessions_page
 
 
@@ -52,6 +53,12 @@ def edit_session(session_id: str) -> None:
 def duplicate_session(session_id: str) -> None:
     render_header("sessions")
     session_form_page(None, duplicate_from=session_id)
+
+
+@ui.page("/sessions/{session_id}/run")
+def run_session(session_id: str) -> None:
+    render_header("sessions")
+    session_run_page(session_id)
 
 
 @ui.page("/exercises")
