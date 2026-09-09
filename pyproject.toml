@@ -13,7 +13,9 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "mongomock>=4.3.0",
     "mypy>=1.20.2",
+    "pytest>=9.1.1",
     "ruff>=0.15.11",
 ]
 
@@ -39,3 +41,7 @@ convention = "google"
 python_version = "3.13"
 strict = true
 ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
