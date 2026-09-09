@@ -48,6 +48,7 @@ def render(session_id: str | None, duplicate_from: str | None = None) -> None:
             date_in = date_field("Date", value=existing.date if existing else None).classes(
                 "flex-1"
             )
+            date_in.on_value_change(lambda: _clear_error(date_in))
             weight_in = number_field(
                 "Weight (kg)",
                 value=existing.weight if existing and existing.weight is not None else 0.0,
@@ -202,6 +203,7 @@ def _show_exercise_form(
             ).classes("flex-1")
 
         def on_name_change(value: str | None) -> None:
+            _clear_error(name_sel)
             name = value or ""
             variant_sel.options = variant_opts(name)
             variant_sel.value = None
@@ -267,14 +269,25 @@ def _show_exercise_form(
                 suffix="seconds",
             ).classes("w-full sm:flex-1")
 
+        def clear_effort_errors() -> None:
+            _clear_error(reps_in)
+            _clear_error(duration_in)
+
+        reps_in.on_value_change(clear_effort_errors)
+        duration_in.on_value_change(clear_effort_errors)
+
         def save() -> None:
+            _clear_error(name_sel)
             name = (name_sel.value or "").strip()
             variant_name = (variant_sel.value or "").strip() or None
 
             if not name:
+                _flag_error(name_sel, "Exercise name is required")
                 ui.notify("Exercise name is required", color="negative")
                 return
             if reps_in.value != 0 and duration_in.value != 0:
+                _flag_error(reps_in, "Choose reps or duration, not both")
+                _flag_error(duration_in, "Choose reps or duration, not both")
                 ui.notify("Fill Reps OR Duration — not both", color="negative")
                 return
 
@@ -317,6 +330,14 @@ def _show_exercise_form(
 # ---------------------------------------------------------------------------
 
 
+def _flag_error(field: ui.element, message: str) -> None:
+    field.props(f'error error-message="{message}"')
+
+
+def _clear_error(field: ui.element) -> None:
+    field.props(remove="error error-message")
+
+
 def _remove(ex_list: list[SessionExercise], index: int, refresh: Callable[[], None]) -> None:
     ex_list.pop(index)
     refresh()
@@ -347,7 +368,9 @@ def _save(
     workout_exs: list[SessionExercise],
     stretch_exs: list[SessionExercise],
 ) -> None:
+    _clear_error(date_in)
     if not str(date_in.value).strip():
+        _flag_error(date_in, "Date is required")
         ui.notify("Date is required", color="negative")
         return
 
