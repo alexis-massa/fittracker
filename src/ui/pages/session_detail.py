@@ -6,6 +6,7 @@ from src.models.exercise import SessionExercise
 from src.ui.components import btn_danger
 from src.ui.components import btn_ghost
 from src.ui.components import card_row
+from src.ui.components import confirm_dialog
 from src.ui.components import page_title
 from src.ui.components import section_title
 from src.ui.components import tag
@@ -84,6 +85,9 @@ def _exercise_row(ex: SessionExercise, dim: bool = False) -> None:
 
 
 def _delete(session_id: str) -> None:
-    session_model.delete(session_id)
-    ui.notify("Session deleted")
-    ui.navigate.to("/")
+    def do_delete() -> None:
+        session_model.delete(session_id)
+        ui.notify("Session deleted")
+        ui.navigate.to("/")
+
+    confirm_dialog("Delete this session? This cannot be undone.", do_delete)
