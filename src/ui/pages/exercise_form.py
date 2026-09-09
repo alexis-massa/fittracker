@@ -1,6 +1,4 @@
 # src/ui/pages/exercise_form.py
-from collections.abc import Callable
-
 from nicegui import ui
 
 from src.models import exercise as exercise_model
@@ -16,7 +14,7 @@ from src.ui.components import section_title
 from src.ui.pages.exercise_create_form import exercise_create_form
 
 
-def render(exercise_id: str | None, navigate: Callable[..., None]) -> None:
+def render(exercise_id: str | None) -> None:
     existing = exercise_model.get_by_id(exercise_id) if exercise_id else None
 
     if not existing:
@@ -27,10 +25,10 @@ def render(exercise_id: str | None, navigate: Callable[..., None]) -> None:
             slot = ui.column().classes("w-full")
 
             def on_done(defn: ExerciseDefinition) -> None:
-                navigate("exercises")
+                ui.navigate.to("/exercises")
 
             def on_cancel() -> None:
-                navigate("exercises")
+                ui.navigate.to("/exercises")
 
             exercise_create_form(slot, on_done=on_done, on_cancel=on_cancel)
         return
@@ -84,10 +82,8 @@ def render(exercise_id: str | None, navigate: Callable[..., None]) -> None:
 
         ui.element("div").classes("q-mb-md")
         with action_row():
-            btn_primary(
-                "Save", on_click=lambda: _save(exercise_id, name_in, label_in, variants, navigate)
-            )
-            btn_ghost("Cancel", on_click=lambda: navigate("exercises"))
+            btn_primary("Save", on_click=lambda: _save(exercise_id, name_in, label_in, variants))
+            btn_ghost("Cancel", on_click=lambda: ui.navigate.to("/exercises"))
 
 
 def _save(
@@ -95,7 +91,6 @@ def _save(
     name_in: ui.input,
     label_in: ui.input,
     variants: list[ExerciseVariant],
-    navigate: Callable[..., None],
 ) -> None:
     if not name_in.value.strip():
         ui.notify("Name is required", color="negative")
@@ -111,4 +106,4 @@ def _save(
         exercise_model.update(exercise_id, defn)
         ui.notify("Exercise updated", color="positive")
 
-    navigate("exercises")
+    ui.navigate.to("/exercises")

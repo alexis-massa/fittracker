@@ -28,7 +28,7 @@ _ENERGY_OPTIONS: dict[int, str] = {e.value: e.name.replace("_", " ").title() for
 _PROGRESS_OPTIONS: dict[str, str] = {p.value: p.value.title() for p in ProgressEnum}
 
 
-def render(session_id: str | None, navigate: Callable[..., None]) -> None:
+def render(session_id: str | None) -> None:
     existing = session_model.get_by_id(session_id) if session_id else None
 
     warmup_exs: list[SessionExercise] = list(existing.warmup if existing else [])
@@ -84,10 +84,9 @@ def render(session_id: str | None, navigate: Callable[..., None]) -> None:
                     warmup_exs,
                     workout_exs,
                     stretch_exs,
-                    navigate,
                 ),
             )
-            btn_ghost("Cancel", on_click=lambda: navigate("sessions"))
+            btn_ghost("Cancel", on_click=lambda: ui.navigate.to("/"))
 
 
 # ---------------------------------------------------------------------------
@@ -346,7 +345,6 @@ def _save(
     warmup_exs: list[SessionExercise],
     workout_exs: list[SessionExercise],
     stretch_exs: list[SessionExercise],
-    navigate: Callable[..., None],
 ) -> None:
     if not str(date_in.value).strip():
         ui.notify("Date is required", color="negative")
@@ -370,4 +368,4 @@ def _save(
         session_model.create(s)
         ui.notify("Session saved", color="positive")
 
-    navigate("sessions")
+    ui.navigate.to("/")
