@@ -1,6 +1,4 @@
 # src/ui/pages/exercises.py
-from collections.abc import Callable
-
 from nicegui import ui
 
 from src.models import exercise as exercise_model
@@ -16,7 +14,7 @@ from src.ui.pages.exercise_create_form import exercise_create_form
 from src.utils.formatting import pluralize
 
 
-def render(navigate: Callable[..., None]) -> None:
+def render() -> None:
     with ui.column().classes("page-content"):
         # ── Header + toggleable create form ───────────────────────────────
         create_slot = ui.column().classes("w-full")
@@ -31,7 +29,7 @@ def render(navigate: Callable[..., None]) -> None:
 
                 def on_done(defn: ExerciseDefinition) -> None:
                     create_visible["value"] = False
-                    navigate("exercises")
+                    ui.navigate.to("/exercises")
 
                 def on_cancel() -> None:
                     create_slot.clear()
@@ -64,11 +62,14 @@ def render(navigate: Callable[..., None]) -> None:
                             "text-caption opacity-70"
                         )
                 with ui.row().classes("items-center gap-2"):
-                    btn_ghost("Edit", on_click=lambda eid_=ex.id: navigate("exercise_form", eid_))
-                    btn_danger("Delete", on_click=lambda eid_=ex.id: _delete(eid_, navigate))
+                    btn_ghost(
+                        "Edit",
+                        on_click=lambda eid_=ex.id: ui.navigate.to(f"/exercises/{eid_}/edit"),
+                    )
+                    btn_danger("Delete", on_click=lambda eid_=ex.id: _delete(eid_))
 
 
-def _delete(exercise_id: str, navigate: Callable[..., None]) -> None:
+def _delete(exercise_id: str) -> None:
     exercise_model.delete(exercise_id)
     ui.notify("Exercise deleted")
-    navigate("exercises")
+    ui.navigate.to("/exercises")

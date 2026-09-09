@@ -1,6 +1,4 @@
 # src/ui/pages/session_detail.py
-from collections.abc import Callable
-
 from nicegui import ui
 
 from src.models import session as session_model
@@ -14,7 +12,7 @@ from src.ui.components import tag
 from src.utils.formatting import pluralize
 
 
-def render(session_id: str | None, navigate: Callable[..., None]) -> None:
+def render(session_id: str | None) -> None:
     if not session_id:
         ui.label("No session selected.").classes("text-caption opacity-70")
         return
@@ -25,7 +23,7 @@ def render(session_id: str | None, navigate: Callable[..., None]) -> None:
         return
 
     with ui.column().classes("page-content"):
-        btn_ghost("← Back", on_click=lambda: navigate("sessions"))
+        btn_ghost("← Back", on_click=lambda: ui.navigate.to("/"))
         ui.element("div").classes("q-mb-sm")
         page_title(f"Session — {s.date}")
 
@@ -55,8 +53,8 @@ def render(session_id: str | None, navigate: Callable[..., None]) -> None:
         ui.separator().classes("q-my-md")
         sid = s.id
         with ui.row().classes("items-center gap-2"):
-            btn_ghost("Edit", on_click=lambda: navigate("session_form", sid))
-            btn_danger("Delete", on_click=lambda: _delete(sid, navigate))
+            btn_ghost("Edit", on_click=lambda: ui.navigate.to(f"/sessions/{sid}/edit"))
+            btn_danger("Delete", on_click=lambda: _delete(sid))
 
 
 def _exercise_group(title: str, exercises: list[SessionExercise], dim: bool = False) -> None:
@@ -84,7 +82,7 @@ def _exercise_row(ex: SessionExercise, dim: bool = False) -> None:
         )
 
 
-def _delete(session_id: str, navigate: Callable[..., None]) -> None:
+def _delete(session_id: str) -> None:
     session_model.delete(session_id)
     ui.notify("Session deleted")
-    navigate("sessions")
+    ui.navigate.to("/")
