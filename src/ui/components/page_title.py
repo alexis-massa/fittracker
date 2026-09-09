@@ -3,4 +3,4 @@ from nicegui import ui
 
 
 def page_title(text: str) -> ui.label:
-    return ui.label(text).classes("text-h4 text-weight-bold grey-7")
+    return ui.label(text).classes("text-h4 text-weight-bold text-grey-7")

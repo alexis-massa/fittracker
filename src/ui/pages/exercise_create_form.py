@@ -33,13 +33,13 @@ def exercise_create_form(
         on_cancel: Optional callback when the user cancels. Defaults to deleting the card.
     """
     with parent, form_card() as create_card:
-        ui.label("New Exercise").classes("inline-form-title")
+        ui.label("New Exercise").classes("text-subtitle1 text-weight-bold q-mb-sm")
 
         with ui.row().classes("w-full items-center gap-2 flex-wrap"):
             dn_in = input_field("Name (e.g. A)").classes("flex-1")
             dl_in = input_field("Label (e.g. Pushup)").classes("flex-1")
 
-        ui.element("div").classes("spacer-sm")
+        ui.element("div").classes("q-mb-sm")
         section_title("Variants")
 
         new_variants: list[ExerciseVariant] = []
@@ -76,7 +76,7 @@ def exercise_create_form(
 
         btn_ghost("+ Add variant", on_click=add_variant)
 
-        ui.element("div").classes("spacer-sm")
+        ui.element("div").classes("q-mb-sm")
 
         def create() -> None:
             name = dn_in.value.strip()

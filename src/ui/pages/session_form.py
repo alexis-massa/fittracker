@@ -133,12 +133,12 @@ def _exercise_row(
             ).props("size=sm square outline")
         with ui.column().classes("flex-1").style("gap:1px"):
             with ui.row().classes("items-center gap-2"):
-                ui.label(ex.short_name).style("font-size:0.85rem;font-weight:600")
+                ui.label(ex.short_name).classes("text-subtitle1 text-weight-bold")
                 if ex.label or ex.variant_label:
                     desc = " / ".join(filter(None, [ex.label, ex.variant_label]))
-                    ui.label(desc).classes("meta-row q-mt-none")
+                    ui.label(desc).classes("text-caption opacity-70")
             ui.label(f"{ex.sets} sets · {ex.reps} reps · {ex.rest_seconds}s rest").classes(
-                "meta-row"
+                "text-caption opacity-70"
             )
         btn_ghost(
             "Edit", on_click=lambda idx=index: _show_exercise_form(idx, ex_list, container, refresh)
@@ -173,26 +173,28 @@ def _show_exercise_form(
         return {v.name: v.display_name for v in variants}
 
     with container, form_card() as form_card_el:
-        ui.label("Edit Exercise" if existing_ex else "Add Exercise").classes("inline-form-title")
+        ui.label("Edit Exercise" if existing_ex else "Add Exercise").classes(
+            "text-subtitle1 text-weight-bold q-mb-sm"
+        )
 
         create_slot = ui.column().classes("w-full")
 
         with ui.row().classes("w-full items-center gap-2 flex-wrap"):
-            name_sel = ui.select(
+            name_sel = select_field(
+                "Exercise",
                 options=name_opts(),
                 value=existing_ex.name if existing_ex else None,
-                label="Exercise",
                 clearable=True,
-            ).classes("flex-1 nicegui-select")
+            ).classes("flex-1")
 
-            variant_sel = ui.select(
+            variant_sel = select_field(
+                "Variant",
                 options=variant_opts(existing_ex.name) if existing_ex else {},
                 value=existing_ex.variant_name
                 if existing_ex and existing_ex.variant_name
                 else None,
-                label="Variant",
                 clearable=True,
-            ).classes("flex-1 nicegui-select")
+            ).classes("flex-1")
 
         def on_name_change(value: str | None) -> None:
             name = value or ""
@@ -214,29 +216,32 @@ def _show_exercise_form(
             exercise_create_form(create_slot, on_exercise_created)
 
         ui.link("+ Create new exercise", target="#").on("click", lambda _: show_create()).classes(
-            "meta-row"
-        ).style("cursor:pointer;color:var(--accent);text-decoration:none")
+            "text-caption text-primary"
+        ).style("cursor:pointer;text-decoration:none")
 
-        ui.element("div").classes("spacer-sm")
+        ui.element("div").classes("q-mb-sm")
 
-        with ui.row().classes("w-full items-center gap-2 flex-wrap"):
-            ui.label("After resting ").classes("text-sm text-gray-500")
+        effort_row_classes = (
+            "w-full items-start sm:items-center gap-2 flex-col sm:flex-row sm:flex-wrap"
+        )
+        with ui.row().classes(effort_row_classes):
+            ui.label("After resting ").classes("text-caption opacity-70")
             rest_before_in = number_field(
                 "Rest before (s)",
                 value=existing_ex.rest_before if existing_ex else 0,
                 min=0,
                 max=100,
                 suffix="seconds",
-            ).classes("flex-1")
-            ui.label(": Do ").classes("text-sm text-gray-500")
+            ).classes("w-full sm:flex-1")
+            ui.label(": Do ").classes("text-caption opacity-70")
             sets_in = number_field(
                 "Sets", value=existing_ex.sets if existing_ex else 3, min=1, max=100, suffix="sets"
-            ).classes("flex-1")
-            ui.label(" of either ").classes("text-sm text-gray-500")
-            with ui.row().classes("flex-1 items-center gap-2 no-wrap"):
+            ).classes("w-full sm:flex-1")
+            ui.label(" of either ").classes("text-caption opacity-70")
+            with ui.row().classes("w-full sm:flex-1 items-center gap-2 no-wrap"):
                 with ui.column():
-                    ui.label("⎧").classes("text-xl text-gray-500")
-                    ui.label("⎩").classes("text-xl text-gray-500")
+                    ui.label("⎧").classes("text-xl opacity-70")
+                    ui.label("⎩").classes("text-xl opacity-70")
                 with ui.column().classes("w-full gap-1"):
                     reps_in = number_field(
                         "Reps",
@@ -252,15 +257,15 @@ def _show_exercise_form(
                         max=999,
                         suffix="seconds",
                     ).classes("w-full")
-            ui.label("with").classes("text-sm text-gray-500")
+            ui.label("with").classes("text-caption opacity-70")
             rest_in = number_field(
                 "Rest (s)",
                 value=existing_ex.rest_seconds if existing_ex else 90,
                 min=0,
                 max=3600,
                 suffix="seconds",
-            ).classes("flex-1")
-            ui.label(" rest").classes("text-sm text-gray-500")
+            ).classes("w-full sm:flex-1")
+            ui.label(" rest").classes("text-caption opacity-70")
 
         def save() -> None:
             name = (name_sel.value or "").strip()
