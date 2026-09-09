@@ -12,3 +12,8 @@ pre-commit:
 
     mypy:
       run: uv run mypy src
+
+post-commit:
+  commands:
+    changelog:
+      run: scripts/append-changelog.sh
