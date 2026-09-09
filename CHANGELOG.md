@@ -6,6 +6,7 @@ appended automatically to `[Unreleased]` by a commit hook (see
 [README.md](README.md)); versions are cut and tagged on `main` by hand.
 
 ## [Unreleased]
+- refactor: extract header building into _render_header helper
 - fix: prevent header overflow on mobile viewports
 - fix: correct grey-7 typo and outline input fields for consistency
 - fix: replace dead spacer/heading classes with Quasar utilities

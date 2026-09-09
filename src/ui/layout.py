@@ -72,7 +72,7 @@ def _rebuild_main() -> None:
             ui.label(f"Unknown page: {page}").classes("text-grey")
 
 
-def build_layout() -> None:
+def _render_header() -> None:
     prefs = preferences.load()
     dark = ui.dark_mode(value=prefs.dark_mode)
 
@@ -90,5 +90,8 @@ def build_layout() -> None:
         with ui.row().classes("q-ml-auto"):
             theme_toggle(dark)
 
+
+def build_layout() -> None:
+    _render_header()
     _main_container["el"] = ui.column().classes("w-full")
     navigate("sessions")
