@@ -48,6 +48,12 @@ def edit_session(session_id: str) -> None:
     session_form_page(session_id)
 
 
+@ui.page("/sessions/{session_id}/duplicate")
+def duplicate_session(session_id: str) -> None:
+    render_header("sessions")
+    session_form_page(None, duplicate_from=session_id)
+
+
 @ui.page("/exercises")
 def exercises() -> None:
     render_header("exercises")
