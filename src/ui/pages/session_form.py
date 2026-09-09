@@ -189,6 +189,7 @@ def _show_exercise_form(
                 options=name_opts(),
                 value=existing_ex.name if existing_ex else None,
                 clearable=True,
+                with_input=True,
             ).classes("flex-1")
 
             variant_sel = select_field(
