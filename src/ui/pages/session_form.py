@@ -303,11 +303,11 @@ def _show_exercise_form(
                 label=lbl,
                 variant_name=chosen_variant.name if chosen_variant else "",
                 variant_label=chosen_variant.label if chosen_variant else "",
-                sets=int(sets_in.value or 3),
-                reps=int(reps_in.value or 10),
-                duration=int(duration_in.value or 0),
-                rest_before=int(rest_before_in.value or 0),
-                rest_seconds=int(rest_in.value or 90),
+                sets=int(sets_in.value) if sets_in.value is not None else 3,
+                reps=int(reps_in.value) if reps_in.value is not None else 10,
+                duration=int(duration_in.value) if duration_in.value is not None else 0,
+                rest_before=int(rest_before_in.value) if rest_before_in.value is not None else 0,
+                rest_seconds=int(rest_in.value) if rest_in.value is not None else 90,
             )
 
             if edit_index is not None:
