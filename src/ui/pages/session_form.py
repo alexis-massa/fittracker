@@ -229,48 +229,43 @@ def _show_exercise_form(
         effort_row_classes = (
             "w-full items-start sm:items-center gap-2 flex-col sm:flex-row sm:flex-wrap"
         )
+
+        section_title("Sets & timing")
         with ui.row().classes(effort_row_classes):
-            ui.label("After resting ").classes("text-caption opacity-70")
             rest_before_in = number_field(
-                "Rest before (s)",
+                "Rest before this exercise (s)",
                 value=existing_ex.rest_before if existing_ex else 0,
                 min=0,
-                max=100,
+                max=3600,
                 suffix="seconds",
             ).classes("w-full sm:flex-1")
-            ui.label(": Do ").classes("text-caption opacity-70")
             sets_in = number_field(
                 "Sets", value=existing_ex.sets if existing_ex else 3, min=1, max=100, suffix="sets"
             ).classes("w-full sm:flex-1")
-            ui.label(" of either ").classes("text-caption opacity-70")
-            with ui.row().classes("w-full sm:flex-1 items-center gap-2 no-wrap"):
-                with ui.column():
-                    ui.label("⎧").classes("text-xl opacity-70")
-                    ui.label("⎩").classes("text-xl opacity-70")
-                with ui.column().classes("w-full gap-1"):
-                    reps_in = number_field(
-                        "Reps",
-                        value=existing_ex.reps if existing_ex else 10,
-                        min=1,
-                        max=200,
-                        suffix="reps",
-                    ).classes("w-full")
-                    duration_in = number_field(
-                        "Duration (s)",
-                        value=existing_ex.duration if existing_ex else 0,
-                        min=0,
-                        max=999,
-                        suffix="seconds",
-                    ).classes("w-full")
-            ui.label("with").classes("text-caption opacity-70")
             rest_in = number_field(
-                "Rest (s)",
+                "Rest between sets (s)",
                 value=existing_ex.rest_seconds if existing_ex else 90,
                 min=0,
                 max=3600,
                 suffix="seconds",
             ).classes("w-full sm:flex-1")
-            ui.label(" rest").classes("text-caption opacity-70")
+
+        section_title("Reps or duration — fill exactly one")
+        with ui.row().classes(effort_row_classes):
+            reps_in = number_field(
+                "Reps",
+                value=existing_ex.reps if existing_ex else 10,
+                min=0,
+                max=200,
+                suffix="reps",
+            ).classes("w-full sm:flex-1")
+            duration_in = number_field(
+                "Duration (s)",
+                value=existing_ex.duration if existing_ex else 0,
+                min=0,
+                max=999,
+                suffix="seconds",
+            ).classes("w-full sm:flex-1")
 
         def save() -> None:
             name = (name_sel.value or "").strip()
