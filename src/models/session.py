@@ -6,7 +6,7 @@ from typing import Any
 
 from src.db import db_manager
 from src.models.exercise import SessionExercise
-from src.utils import mongo as mongo_utils
+from src.utils import pg as pg_utils
 from src.utils.formatting import today_iso
 
 
@@ -78,22 +78,22 @@ class Session:
 def get_all() -> list[Session]:
     return [
         Session.from_doc(doc)
-        for doc in mongo_utils.find_all(db_manager.sessions(), sort_field="date", ascending=False)
+        for doc in pg_utils.find_all(db_manager.sessions(), sort_field="date", ascending=False)
     ]
 
 
 def get_by_id(session_id: str) -> Session | None:
-    doc = mongo_utils.find_one(db_manager.sessions(), session_id)
+    doc = pg_utils.find_one(db_manager.sessions(), session_id)
     return Session.from_doc(doc) if doc else None
 
 
 def create(session: Session) -> str:
-    return mongo_utils.insert_one(db_manager.sessions(), session.to_doc())
+    return pg_utils.insert_one(db_manager.sessions(), session.to_doc())
 
 
 def update(session_id: str, session: Session) -> bool:
-    return mongo_utils.update_one(db_manager.sessions(), session_id, session.to_doc())
+    return pg_utils.update_one(db_manager.sessions(), session_id, session.to_doc())
 
 
 def delete(session_id: str) -> bool:
-    return mongo_utils.delete_one(db_manager.sessions(), session_id)
+    return pg_utils.delete_one(db_manager.sessions(), session_id)

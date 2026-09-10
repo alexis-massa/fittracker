@@ -1,14 +1,14 @@
 services:
-  mongo:
-    ports: !reset []
-
   app:
     ports: !reset []
+    depends_on: !reset []
     environment:
       APP_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
     networks:
       default:
       web:
+      data:
     labels:
       # List form (not a mapping) so ${FITTRACKER_BASIC_AUTH_USER} gets
       # interpolated - compose does not substitute variables in YAML keys.
@@ -17,8 +17,12 @@ services:
       - "caddy.basic_auth.${FITTRACKER_BASIC_AUTH_USER}=${FITTRACKER_BASIC_AUTH_HASH}"
       - "caddy.reverse_proxy={{upstreams 8080}}"
 
-# Reverse-proxied by the shared Caddy in the sibling `caddy-docker-proxy` repo, which
-# discovers this service via the labels above - see that repo for setup.
+# Reverse-proxied by the shared Caddy in the sibling `caddy-docker-proxy` repo,
+# which discovers this service via the labels above - see that repo for setup.
+# `data` is the shared Postgres instance owned by the sibling `territoride`
+# repo - see that repo's docker-compose.prod.yml for how it's created.
 networks:
   web:
+    external: true
+  data:
     external: true

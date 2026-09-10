@@ -1,51 +1,38 @@
-from typing import Any
+from psycopg_pool import ConnectionPool
 
-from pymongo import MongoClient
-from pymongo.collection import Collection
-from pymongo.database import Database
+from src.config import DATABASE_URL
+from src.utils.pg import PgTable
+from src.utils.pg import ensure_table
 
-from src.config import DB_NAME
-from src.config import MONGO_URI
+_TABLES = ("exercises", "sessions")
 
 
 class DatabaseManager:
     def __init__(self) -> None:
-        self._client: MongoClient[dict[str, Any]] | None = None
-        self._db: Database[dict[str, Any]] | None = None
+        self._pool: ConnectionPool | None = None
 
     def connect(self) -> None:
-        # mongodb+srv:// (Atlas) always needs TLS; plain mongodb:// (local,
-        # Docker) generally doesn't - self-hosted Mongo isn't set up for it.
-        # pymongo rejects tlsAllowInvalidCertificates outright when TLS is
-        # off, so it's only passed when TLS is actually in use.
-        tls = MONGO_URI.startswith("mongodb+srv://")
-        tls_options: dict[str, Any] = {"tlsAllowInvalidCertificates": False} if tls else {}
-        self._client = MongoClient(
-            MONGO_URI,
-            tls=tls,
-            serverSelectionTimeoutMS=5000,
-            **tls_options,
-        )
-        self._db = self._client[DB_NAME]
-        print(f"Connected to MongoDB — {DB_NAME}")
+        self._pool = ConnectionPool(DATABASE_URL, min_size=1, max_size=5, open=True)
+        for table in _TABLES:
+            ensure_table(self._pool, table)
+        print("Connected to Postgres")
 
     def disconnect(self) -> None:
-        if self._client is not None:
-            self._client.close()
-            self._client = None
-            self._db = None
-            print("MongoDB connection closed")
+        if self._pool is not None:
+            self._pool.close()
+            self._pool = None
+            print("Postgres connection closed")
 
-    def get_collection(self, name: str) -> Collection[dict[str, Any]]:
-        if self._db is None:
+    def _table(self, name: str) -> PgTable:
+        if self._pool is None:
             raise RuntimeError("Database not connected. Call connect() first.")
-        return self._db[name]
+        return PgTable(self._pool, name)
 
-    def exercises(self) -> Collection[dict[str, Any]]:
-        return self.get_collection("exercises")
+    def exercises(self) -> PgTable:
+        return self._table("exercises")
 
-    def sessions(self) -> Collection[dict[str, Any]]:
-        return self.get_collection("sessions")
+    def sessions(self) -> PgTable:
+        return self._table("sessions")
 
 
 db_manager = DatabaseManager()

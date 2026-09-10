@@ -6,6 +6,7 @@ appended automatically to `[Unreleased]` by a commit hook (see
 [README.md](README.md)); versions are cut and tagged on `main` by hand.
 
 ## [Unreleased]
+- feat: migrate storage from MongoDB to shared Postgres
 - chore: config for a common caddy docker
 
 ## [0.1.0] - 2026-09-09
