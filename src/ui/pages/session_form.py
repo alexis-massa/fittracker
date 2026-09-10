@@ -2,6 +2,7 @@
 from collections.abc import Callable
 
 from nicegui import ui
+from nicegui.elements.mixins.validation_element import ValidationElement
 
 from src.models import session as session_model
 from src.models.exercise import ExerciseDefinition
@@ -303,11 +304,11 @@ def _show_exercise_form(
                 label=lbl,
                 variant_name=chosen_variant.name if chosen_variant else "",
                 variant_label=chosen_variant.label if chosen_variant else "",
-                sets=int(sets_in.value or 3),
-                reps=int(reps_in.value or 10),
-                duration=int(duration_in.value or 0),
-                rest_before=int(rest_before_in.value or 0),
-                rest_seconds=int(rest_in.value or 90),
+                sets=int(sets_in.value) if sets_in.value is not None else 3,
+                reps=int(reps_in.value) if reps_in.value is not None else 10,
+                duration=int(duration_in.value) if duration_in.value is not None else 0,
+                rest_before=int(rest_before_in.value) if rest_before_in.value is not None else 0,
+                rest_seconds=int(rest_in.value) if rest_in.value is not None else 90,
             )
 
             if edit_index is not None:
@@ -330,12 +331,12 @@ def _show_exercise_form(
 # ---------------------------------------------------------------------------
 
 
-def _flag_error(field: ui.element, message: str) -> None:
-    field.props(f'error error-message="{message}"')
+def _flag_error(field: ValidationElement, message: str) -> None:
+    field.error = message
 
 
-def _clear_error(field: ui.element) -> None:
-    field.props(remove="error error-message")
+def _clear_error(field: ValidationElement) -> None:
+    field.error = None
 
 
 def _remove(ex_list: list[SessionExercise], index: int, refresh: Callable[[], None]) -> None:

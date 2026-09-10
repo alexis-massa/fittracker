@@ -9,11 +9,16 @@ services:
     networks:
       default:
       web:
-        aliases:
-          - fittracker-app
+    labels:
+      # List form (not a mapping) so ${FITTRACKER_BASIC_AUTH_USER} gets
+      # interpolated - compose does not substitute variables in YAML keys.
+      - "caddy=${FITTRACKER_DOMAIN}"
+      - "caddy.basic_auth="
+      - "caddy.basic_auth.${FITTRACKER_BASIC_AUTH_USER}=${FITTRACKER_BASIC_AUTH_HASH}"
+      - "caddy.reverse_proxy={{upstreams 8080}}"
 
-# A separate Caddy instance (from another compose project on the same Pi)
-# reverse proxies into this network to reach the app by its alias above.
+# Reverse-proxied by the shared Caddy in the sibling `caddy-docker-proxy` repo, which
+# discovers this service via the labels above - see that repo for setup.
 networks:
   web:
     external: true

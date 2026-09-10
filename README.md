@@ -9,6 +9,19 @@ a session.
 A personal hobby project, built largely as an experiment in
 pair-programming with Claude.
 
+## Training method
+
+The set/rep/rest model is built around Olivier Lafay's *Méthode de
+musculation* (bodyweight-only circuits of timed series, with strict,
+prescribed rest between each series and between exercises — progression
+comes from adding reps at a fixed rest time, never from cutting rest
+short). That's why every exercise entry in a session tracks `rest_before`
+(the transition rest before starting it) and `rest_seconds` (rest between
+series) as first-class fields alongside sets/reps — the method itself is
+built around exact timing, which is also why a guided, timer-driven
+"run session" mode (rather than just logging after the fact) is the
+natural direction for this app.
+
 ## Stack
 
 [NiceGUI](https://nicegui.io) (renders a Vue/Quasar UI from pure Python —
