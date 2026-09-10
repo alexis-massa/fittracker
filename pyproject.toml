@@ -5,7 +5,6 @@ description = "A personal workout tracker built around the Lafay method's timed 
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "lefthook>=2.1.6",
     "nicegui>=3.10.0",
     "psycopg[binary]>=3.2.10",
     "psycopg-pool>=3.2.6",
@@ -14,6 +13,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "lefthook>=2.1.6",
     "mypy>=1.20.2",
     "pytest>=9.1.1",
     "ruff>=0.15.11",

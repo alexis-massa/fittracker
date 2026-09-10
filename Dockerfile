@@ -13,11 +13,15 @@ RUN chown app:app /app
 USER app
 
 COPY --chown=app:app pyproject.toml uv.lock ./
-RUN uv sync --frozen --no-install-project
+RUN uv sync --frozen --no-install-project --no-dev
 
 COPY --chown=app:app . .
-RUN uv sync --frozen
+RUN uv sync --frozen --no-dev
 
 EXPOSE 8080
 
-CMD ["uv", "run", "python", "main.py"]
+# Run the venv's own interpreter directly rather than "uv run" - uv run
+# re-syncs against the default dependency groups (dev included) on every
+# invocation, undoing the --no-dev image above and adding a network call
+# on every container start.
+CMD [".venv/bin/python", "main.py"]

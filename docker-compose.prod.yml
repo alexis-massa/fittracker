@@ -2,6 +2,10 @@ services:
   app:
     ports: !reset []
     depends_on: !reset []
+    # Run purely off what's baked into the image at build time - no live
+    # host mount, so dev tooling never leaks in and a redeploy means
+    # rebuilding the image, not mutating a running container in place.
+    volumes: !reset []
     environment:
       APP_ENV: production
       DATABASE_URL: ${DATABASE_URL}
