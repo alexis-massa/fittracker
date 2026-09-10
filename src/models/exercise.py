@@ -5,7 +5,7 @@ from dataclasses import field
 from typing import Any
 
 from src.db import db_manager
-from src.utils import mongo as mongo_utils
+from src.utils import pg as pg_utils
 
 # ---------------------------------------------------------------------------
 # Variant — embedded in ExerciseDefinition, never stored separately
@@ -143,22 +143,22 @@ class SessionExercise:
 def get_all() -> list[ExerciseDefinition]:
     return [
         ExerciseDefinition.from_doc(doc)
-        for doc in mongo_utils.find_all(db_manager.exercises(), sort_field="name")
+        for doc in pg_utils.find_all(db_manager.exercises(), sort_field="name")
     ]
 
 
 def get_by_id(exercise_id: str) -> ExerciseDefinition | None:
-    doc = mongo_utils.find_one(db_manager.exercises(), exercise_id)
+    doc = pg_utils.find_one(db_manager.exercises(), exercise_id)
     return ExerciseDefinition.from_doc(doc) if doc else None
 
 
 def create(defn: ExerciseDefinition) -> str:
-    return mongo_utils.insert_one(db_manager.exercises(), defn.to_doc())
+    return pg_utils.insert_one(db_manager.exercises(), defn.to_doc())
 
 
 def update(exercise_id: str, defn: ExerciseDefinition) -> bool:
-    return mongo_utils.update_one(db_manager.exercises(), exercise_id, defn.to_doc())
+    return pg_utils.update_one(db_manager.exercises(), exercise_id, defn.to_doc())
 
 
 def delete(exercise_id: str) -> bool:
-    return mongo_utils.delete_one(db_manager.exercises(), exercise_id)
+    return pg_utils.delete_one(db_manager.exercises(), exercise_id)

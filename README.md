@@ -25,8 +25,9 @@ natural direction for this app.
 ## Stack
 
 [NiceGUI](https://nicegui.io) (renders a Vue/Quasar UI from pure Python —
-no separate frontend or build step), MongoDB for storage, `uv` for
-dependency management.
+no separate frontend or build step), PostgreSQL (JSONB documents, no ORM)
+for storage, `uv` for dependency management. In production this shares a
+Postgres instance with a sibling project rather than running its own.
 
 ## Local development
 
@@ -34,12 +35,17 @@ dependency management.
 ./setup.sh
 ```
 
-Prompts for a MongoDB connection string (leave blank to use a local
-MongoDB), writes `.env`, and installs dependencies and git hooks. Refuses
-to run if `.env` already exists, so it's safe to leave lying around —
-remove `.env` first if you want to regenerate it.
+Writes `.env` and installs dependencies and git hooks. Refuses to run if
+`.env` already exists, so it's safe to leave lying around — remove `.env`
+first if you want to regenerate it.
 
-Then:
+Then start the local Postgres:
+
+```bash
+docker compose up -d db
+```
+
+And run the app:
 
 ```bash
 uv run main.py
