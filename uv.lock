@@ -212,7 +212,6 @@ name = "fittracker"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "lefthook" },
     { name = "nicegui" },
     { name = "psycopg", extra = ["binary"] },
     { name = "psycopg-pool" },
@@ -221,6 +220,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "lefthook" },
     { name = "mypy" },
     { name = "pytest" },
     { name = "ruff" },
@@ -228,7 +228,6 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "lefthook", specifier = ">=2.1.6" },
     { name = "nicegui", specifier = ">=3.10.0" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.2.10" },
     { name = "psycopg-pool", specifier = ">=3.2.6" },
@@ -237,6 +236,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "lefthook", specifier = ">=2.1.6" },
     { name = "mypy", specifier = ">=1.20.2" },
     { name = "pytest", specifier = ">=9.1.1" },
     { name = "ruff", specifier = ">=0.15.11" },

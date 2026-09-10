@@ -6,6 +6,7 @@ appended automatically to `[Unreleased]` by a commit hook (see
 [README.md](README.md)); versions are cut and tagged on `main` by hand.
 
 ## [Unreleased]
+- chore: exclude dev dependencies from the production image
 - feat: migrate storage from MongoDB to shared Postgres
 - chore: config for a common caddy docker
 
