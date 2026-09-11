@@ -24,6 +24,7 @@ from src.ui.components.session_info_fields import session_info_fields
 from src.ui.pages.exercise_create_form import exercise_create_form
 from src.ui.validation import clear_error
 from src.ui.validation import flag_error
+from src.utils.formatting import pluralize
 
 
 def render(session_id: str | None, duplicate_from: str | None = None) -> None:
@@ -70,10 +71,11 @@ def render(session_id: str | None, duplicate_from: str | None = None) -> None:
 
 
 def _exercise_group(title: str, ex_list: list[SessionExercise]) -> None:
-    section_title(title)
+    heading = section_title(f"{title} — {pluralize(len(ex_list), 'exercise')}")
     container = ui.column().classes("w-full")
 
     def refresh() -> None:
+        heading.set_text(f"{title} — {pluralize(len(ex_list), 'exercise')}")
         container.clear()
         with container:
             for i, ex in enumerate(ex_list):
