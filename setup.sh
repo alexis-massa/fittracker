@@ -9,14 +9,10 @@ if [ -f .env ]; then
   exit 1
 fi
 
-echo "MongoDB connection (leave blank to use a local MongoDB):"
-read -rp "  Mongo URI [mongodb://localhost:27017]: " MONGO_URI
-MONGO_URI=${MONGO_URI:-mongodb://localhost:27017}
-
 cat > .env << EOF
-MONGO_URI=${MONGO_URI}
-DB_NAME=fittracker
+DATABASE_URL=postgresql://fittracker:fittracker@localhost:5433/fittracker
 APP_PORT=8080
+COMPOSE_PROFILES=dev
 EOF
 echo "Wrote .env"
 
@@ -25,4 +21,4 @@ uv run lefthook install
 echo "Installed dependencies and git hooks"
 
 echo
-echo "Ready: uv run main.py"
+echo "Ready: docker compose up -d to start the local Postgres, then uv run main.py"

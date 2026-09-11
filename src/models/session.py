@@ -6,7 +6,7 @@ from typing import Any
 
 from src.db import db_manager
 from src.models.exercise import SessionExercise
-from src.utils import mongo as mongo_utils
+from src.utils import pg as pg_utils
 from src.utils.formatting import today_iso
 
 
@@ -34,6 +34,9 @@ class Session:
     warmup: list[SessionExercise] = field(default_factory=list[SessionExercise])
     workout: list[SessionExercise] = field(default_factory=list[SessionExercise])
     stretches: list[SessionExercise] = field(default_factory=list[SessionExercise])
+    # False for a plan not yet run - energy/weight/progress/notes/date are
+    # meaningless placeholders until it is (see session_info_fields.py).
+    completed: bool = False
     _id: str = field(default="", repr=False)
 
     @property
@@ -55,6 +58,7 @@ class Session:
             warmup=build(doc.get("warmup", [])),
             workout=build(doc.get("workout", [])),
             stretches=build(doc.get("stretches", [])),
+            completed=doc.get("completed", False),
         )
 
     def to_doc(self) -> dict[str, Any]:
@@ -67,6 +71,7 @@ class Session:
             "warmup": [e.to_doc() for e in self.warmup],
             "workout": [e.to_doc() for e in self.workout],
             "stretches": [e.to_doc() for e in self.stretches],
+            "completed": self.completed,
         }
 
 
@@ -78,22 +83,39 @@ class Session:
 def get_all() -> list[Session]:
     return [
         Session.from_doc(doc)
-        for doc in mongo_utils.find_all(db_manager.sessions(), sort_field="date", ascending=False)
+        for doc in pg_utils.find_all(db_manager.sessions(), sort_field="date", ascending=False)
     ]
 
 
+def get_last_completed() -> Session | None:
+    return next((s for s in get_all() if s.completed), None)
+
+
+def get_last_used(name: str, variant_name: str) -> SessionExercise | None:
+    """Most recent SessionExercise matching `name`, preferring an exact variant match."""
+    fallback: SessionExercise | None = None
+    for session in get_all():
+        for ex in session.warmup + session.workout + session.stretches:
+            if ex.name != name:
+                continue
+            if ex.variant_name == variant_name:
+                return ex
+            fallback = fallback or ex
+    return fallback
+
+
 def get_by_id(session_id: str) -> Session | None:
-    doc = mongo_utils.find_one(db_manager.sessions(), session_id)
+    doc = pg_utils.find_one(db_manager.sessions(), session_id)
     return Session.from_doc(doc) if doc else None
 
 
 def create(session: Session) -> str:
-    return mongo_utils.insert_one(db_manager.sessions(), session.to_doc())
+    return pg_utils.insert_one(db_manager.sessions(), session.to_doc())
 
 
 def update(session_id: str, session: Session) -> bool:
-    return mongo_utils.update_one(db_manager.sessions(), session_id, session.to_doc())
+    return pg_utils.update_one(db_manager.sessions(), session_id, session.to_doc())
 
 
 def delete(session_id: str) -> bool:
-    return mongo_utils.delete_one(db_manager.sessions(), session_id)
+    return pg_utils.delete_one(db_manager.sessions(), session_id)

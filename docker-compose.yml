@@ -1,11 +1,21 @@
 services:
-  mongo:
-    image: mongo:8
+  db:
+    image: postgres:16-alpine
     restart: unless-stopped
+    # Only started for local dev (see COMPOSE_PROFILES in .env.example) -
+    # production points DATABASE_URL at a shared instance instead.
+    profiles:
+      - dev
+    environment:
+      POSTGRES_DB: fittracker
+      POSTGRES_USER: fittracker
+      POSTGRES_PASSWORD: fittracker
     volumes:
-      - mongodata:/data/db
+      - pgdata:/var/lib/postgresql/data
     ports:
-      - "27017:27017"
+      # Non-default host port so this doesn't clash with another project's
+      # local Postgres (e.g. territoride) running at the same time.
+      - "5433:5432"
 
   app:
     build: .
@@ -18,10 +28,10 @@ services:
       - .env
     environment:
       # Override just the host so this works out of the box in Compose -
-      # .env's MONGO_URI stays "localhost" for running main.py directly.
-      MONGO_URI: mongodb://mongo:27017
+      # .env's DATABASE_URL stays "localhost" for running main.py directly.
+      DATABASE_URL: postgresql://fittracker:fittracker@db:5432/fittracker
     depends_on:
-      - mongo
+      - db
 
 volumes:
-  mongodata:
+  pgdata:

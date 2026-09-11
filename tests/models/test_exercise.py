@@ -1,12 +1,9 @@
-from typing import Any
-
-from bson import ObjectId
-from pymongo.collection import Collection
-
 from src.models import exercise
 from src.models.exercise import ExerciseDefinition
 from src.models.exercise import ExerciseVariant
 from src.models.exercise import SessionExercise
+from src.utils import pg
+from src.utils.pg import PgTable
 
 
 def test_exercise_variant_display_name_includes_label_when_present() -> None:
@@ -136,38 +133,24 @@ def test_session_exercise_from_definition_with_variant() -> None:
     assert se.variant_label == "Wide"
 
 
-def test_get_all_returns_definitions_sorted_by_name(
-    exercises_collection: Collection[dict[str, Any]],
-) -> None:
-    exercises_collection.insert_many(
-        [
-            {"name": "B", "label": "Situp", "variants": []},
-            {"name": "A", "label": "Pushup", "variants": []},
-        ]
-    )
+def test_get_all_returns_definitions_sorted_by_name(exercises_table: PgTable) -> None:
+    pg.insert_one(exercises_table, {"name": "B", "label": "Situp", "variants": []})
+    pg.insert_one(exercises_table, {"name": "A", "label": "Pushup", "variants": []})
     assert [defn.name for defn in exercise.get_all()] == ["A", "B"]
 
 
-def test_get_by_id_returns_matching_definition(
-    exercises_collection: Collection[dict[str, Any]],
-) -> None:
-    inserted_id = exercises_collection.insert_one(
-        {"name": "A", "label": "Pushup", "variants": []}
-    ).inserted_id
-    defn = exercise.get_by_id(str(inserted_id))
+def test_get_by_id_returns_matching_definition(exercises_table: PgTable) -> None:
+    inserted_id = pg.insert_one(exercises_table, {"name": "A", "label": "Pushup", "variants": []})
+    defn = exercise.get_by_id(inserted_id)
     assert defn is not None
     assert defn.name == "A"
 
 
-def test_get_by_id_returns_none_when_missing(
-    exercises_collection: Collection[dict[str, Any]],
-) -> None:
-    assert exercise.get_by_id(str(ObjectId())) is None
+def test_get_by_id_returns_none_when_missing(exercises_table: PgTable) -> None:
+    assert exercise.get_by_id("999999") is None
 
 
-def test_create_persists_definition_and_returns_id(
-    exercises_collection: Collection[dict[str, Any]],
-) -> None:
+def test_create_persists_definition_and_returns_id(exercises_table: PgTable) -> None:
     defn = ExerciseDefinition(name="A", label="Pushup")
     new_id = exercise.create(defn)
     stored = exercise.get_by_id(new_id)
@@ -175,9 +158,7 @@ def test_create_persists_definition_and_returns_id(
     assert stored.name == "A"
 
 
-def test_update_modifies_existing_definition(
-    exercises_collection: Collection[dict[str, Any]],
-) -> None:
+def test_update_modifies_existing_definition(exercises_table: PgTable) -> None:
     defn = ExerciseDefinition(name="A", label="Pushup")
     new_id = exercise.create(defn)
     updated = ExerciseDefinition(name="A", label="Push-up")
@@ -185,7 +166,7 @@ def test_update_modifies_existing_definition(
     assert exercise.get_by_id(new_id).label == "Push-up"  # type: ignore[union-attr]
 
 
-def test_delete_removes_definition(exercises_collection: Collection[dict[str, Any]]) -> None:
+def test_delete_removes_definition(exercises_table: PgTable) -> None:
     defn = ExerciseDefinition(name="A", label="Pushup")
     new_id = exercise.create(defn)
     assert exercise.delete(new_id) is True

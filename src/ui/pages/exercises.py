@@ -8,6 +8,7 @@ from src.ui.components import btn_ghost
 from src.ui.components import btn_primary
 from src.ui.components import card_row
 from src.ui.components import confirm_dialog
+from src.ui.components import exercise_pictogram
 from src.ui.components import page_header_row
 from src.ui.components import page_title
 from src.ui.components import section_title
@@ -56,12 +57,14 @@ def render() -> None:
 
         for ex in exercises:
             with card_row(), ui.row().classes("w-full items-center justify-between"):
-                with ui.column().style("gap:2px"):
-                    ui.label(ex.display_name).classes("text-subtitle1 text-weight-bold")
-                    if ex.variants:
-                        ui.label("  ·  ".join(v.display_name for v in ex.variants)).classes(
-                            "text-caption opacity-70"
-                        )
+                with ui.row().classes("items-center gap-3"):
+                    exercise_pictogram(ex.name)
+                    with ui.column().style("gap:2px"):
+                        ui.label(ex.display_name).classes("text-subtitle1 text-weight-bold")
+                        if ex.variants:
+                            with ui.column().style("gap:0px"):
+                                for v in ex.variants:
+                                    ui.label(v.display_name).classes("text-caption opacity-70")
                 with ui.row().classes("items-center gap-2"):
                     btn_ghost(
                         "Edit",

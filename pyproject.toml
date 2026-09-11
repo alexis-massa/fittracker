@@ -1,19 +1,19 @@
 [project]
 name = "fittracker"
-version = "0.1.0"
+version = "0.2.0"
 description = "A personal workout tracker built around the Lafay method's timed set/rest circuits, using NiceGUI."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "lefthook>=2.1.6",
     "nicegui>=3.10.0",
-    "pymongo>=4.17.0",
+    "psycopg[binary]>=3.2.10",
+    "psycopg-pool>=3.2.6",
     "python-dotenv>=1.2.2",
 ]
 
 [dependency-groups]
 dev = [
-    "mongomock>=4.3.0",
+    "lefthook>=2.1.6",
     "mypy>=1.20.2",
     "pytest>=9.1.1",
     "ruff>=0.15.11",

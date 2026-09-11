@@ -1,14 +1,12 @@
 from datetime import date
-from typing import Any
-
-from bson import ObjectId
-from pymongo.collection import Collection
 
 from src.models import session
 from src.models.exercise import SessionExercise
 from src.models.session import EnergyLevel
 from src.models.session import ProgressEnum
 from src.models.session import Session
+from src.utils import pg
+from src.utils.pg import PgTable
 
 
 def test_session_date_defaults_to_today() -> None:
@@ -78,53 +76,84 @@ def test_session_round_trips_through_doc() -> None:
     assert rebuilt.stretches == original.stretches
 
 
-def test_get_all_returns_sessions_sorted_by_date_descending(
-    sessions_collection: Collection[dict[str, Any]],
-) -> None:
-    sessions_collection.insert_many(
-        [
-            {"date": "2026-01-01", "progress": "MAINTAIN"},
-            {"date": "2026-02-01", "progress": "MAINTAIN"},
-        ]
-    )
+def test_get_all_returns_sessions_sorted_by_date_descending(sessions_table: PgTable) -> None:
+    pg.insert_one(sessions_table, {"date": "2026-01-01", "progress": "MAINTAIN"})
+    pg.insert_one(sessions_table, {"date": "2026-02-01", "progress": "MAINTAIN"})
     assert [s.date for s in session.get_all()] == ["2026-02-01", "2026-01-01"]
 
 
-def test_get_by_id_returns_matching_session(
-    sessions_collection: Collection[dict[str, Any]],
-) -> None:
-    inserted_id = sessions_collection.insert_one(
-        {"date": "2026-01-01", "progress": "MAINTAIN"}
-    ).inserted_id
-    found = session.get_by_id(str(inserted_id))
+def test_get_by_id_returns_matching_session(sessions_table: PgTable) -> None:
+    inserted_id = pg.insert_one(sessions_table, {"date": "2026-01-01", "progress": "MAINTAIN"})
+    found = session.get_by_id(inserted_id)
     assert found is not None
     assert found.date == "2026-01-01"
 
 
-def test_get_by_id_returns_none_when_missing(
-    sessions_collection: Collection[dict[str, Any]],
-) -> None:
-    assert session.get_by_id(str(ObjectId())) is None
+def test_get_by_id_returns_none_when_missing(sessions_table: PgTable) -> None:
+    assert session.get_by_id("999999") is None
 
 
-def test_create_persists_session_and_returns_id(
-    sessions_collection: Collection[dict[str, Any]],
-) -> None:
+def test_create_persists_session_and_returns_id(sessions_table: PgTable) -> None:
     new_id = session.create(Session(date="2026-01-01"))
     stored = session.get_by_id(new_id)
     assert stored is not None
     assert stored.date == "2026-01-01"
 
 
-def test_update_modifies_existing_session(
-    sessions_collection: Collection[dict[str, Any]],
-) -> None:
+def test_update_modifies_existing_session(sessions_table: PgTable) -> None:
     new_id = session.create(Session(date="2026-01-01"))
     assert session.update(new_id, Session(date="2026-01-02")) is True
     assert session.get_by_id(new_id).date == "2026-01-02"  # type: ignore[union-attr]
 
 
-def test_delete_removes_session(sessions_collection: Collection[dict[str, Any]]) -> None:
+def test_delete_removes_session(sessions_table: PgTable) -> None:
     new_id = session.create(Session(date="2026-01-01"))
     assert session.delete(new_id) is True
     assert session.get_by_id(new_id) is None
+
+
+def test_get_last_completed_returns_none_when_none_completed(sessions_table: PgTable) -> None:
+    session.create(Session(date="2026-01-01", completed=False))
+    assert session.get_last_completed() is None
+
+
+def test_get_last_completed_skips_incomplete_and_picks_most_recent(
+    sessions_table: PgTable,
+) -> None:
+    session.create(Session(date="2026-01-01", weight=70.0, completed=True))
+    session.create(Session(date="2026-03-01", completed=False))
+    session.create(Session(date="2026-02-01", weight=68.0, completed=True))
+    last = session.get_last_completed()
+    assert last is not None
+    assert last.date == "2026-02-01"
+    assert last.weight == 68.0
+
+
+def test_get_last_used_returns_none_when_never_used(sessions_table: PgTable) -> None:
+    assert session.get_last_used("A", "") is None
+
+
+def test_get_last_used_finds_match_across_groups_and_sessions(sessions_table: PgTable) -> None:
+    session.create(Session(date="2026-01-01", workout=[SessionExercise(name="A", sets=3)]))
+    session.create(Session(date="2026-02-01", warmup=[SessionExercise(name="A", sets=5)]))
+    last = session.get_last_used("A", "")
+    assert last is not None
+    assert last.sets == 5
+
+
+def test_get_last_used_prefers_exact_variant_match(sessions_table: PgTable) -> None:
+    session.create(
+        Session(
+            date="2026-02-01",
+            workout=[SessionExercise(name="A", variant_name="1", sets=3)],
+        )
+    )
+    session.create(
+        Session(
+            date="2026-01-01",
+            workout=[SessionExercise(name="A", variant_name="2", sets=7)],
+        )
+    )
+    last = session.get_last_used("A", "2")
+    assert last is not None
+    assert last.sets == 7
