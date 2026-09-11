@@ -170,8 +170,10 @@ def _render_phase(
 
 def _render_reflect(s: Session, state: _RunState, refresh: Callable[[], None]) -> None:
     ui.label("Session complete — how did it go?").classes("text-h5 text-weight-bold q-mb-md")
+    last_completed = session_model.get_last_completed()
+    default_weight = last_completed.weight if last_completed else None
     with form_card(), ui.row().classes("w-full items-center gap-4 flex-wrap"):
-        info = session_info_fields(s)
+        info = session_info_fields(s, default_weight=default_weight)
 
     def save() -> None:
         if not apply_session_info(s, info):

@@ -110,3 +110,20 @@ def test_delete_removes_session(sessions_table: PgTable) -> None:
     new_id = session.create(Session(date="2026-01-01"))
     assert session.delete(new_id) is True
     assert session.get_by_id(new_id) is None
+
+
+def test_get_last_completed_returns_none_when_none_completed(sessions_table: PgTable) -> None:
+    session.create(Session(date="2026-01-01", completed=False))
+    assert session.get_last_completed() is None
+
+
+def test_get_last_completed_skips_incomplete_and_picks_most_recent(
+    sessions_table: PgTable,
+) -> None:
+    session.create(Session(date="2026-01-01", weight=70.0, completed=True))
+    session.create(Session(date="2026-03-01", completed=False))
+    session.create(Session(date="2026-02-01", weight=68.0, completed=True))
+    last = session.get_last_completed()
+    assert last is not None
+    assert last.date == "2026-02-01"
+    assert last.weight == 68.0

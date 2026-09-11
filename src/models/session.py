@@ -87,6 +87,10 @@ def get_all() -> list[Session]:
     ]
 
 
+def get_last_completed() -> Session | None:
+    return next((s for s in get_all() if s.completed), None)
+
+
 def get_by_id(session_id: str) -> Session | None:
     doc = pg_utils.find_one(db_manager.sessions(), session_id)
     return Session.from_doc(doc) if doc else None

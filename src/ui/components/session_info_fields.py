@@ -26,16 +26,24 @@ class SessionInfoInputs:
     notes: ui.textarea
 
 
-def session_info_fields(existing: Session | None) -> SessionInfoInputs:
+def session_info_fields(
+    existing: Session | None, default_weight: float | None = None
+) -> SessionInfoInputs:
     """Render the "how did it go" fields (date, weight, energy, progress, notes).
 
     `existing` pre-fills values when editing an already-completed session;
     pass None for a fresh reflection (defaults to today, Medium, Maintain).
+    `default_weight` fills the weight field when `existing` has none - e.g.
+    carrying over the last logged weight into a fresh reflection.
     """
     date_in = date_field("Date", value=existing.date if existing else None).classes("flex-1")
     weight_in = number_field(
         "Weight (kg)",
-        value=existing.weight if existing and existing.weight is not None else 0.0,
+        value=(
+            existing.weight
+            if existing and existing.weight is not None
+            else (default_weight if default_weight is not None else 0.0)
+        ),
         min=0,
         max=999,
         step=0.1,
