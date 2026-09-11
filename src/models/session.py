@@ -91,6 +91,19 @@ def get_last_completed() -> Session | None:
     return next((s for s in get_all() if s.completed), None)
 
 
+def get_last_used(name: str, variant_name: str) -> SessionExercise | None:
+    """Most recent SessionExercise matching `name`, preferring an exact variant match."""
+    fallback: SessionExercise | None = None
+    for session in get_all():
+        for ex in session.warmup + session.workout + session.stretches:
+            if ex.name != name:
+                continue
+            if ex.variant_name == variant_name:
+                return ex
+            fallback = fallback or ex
+    return fallback
+
+
 def get_by_id(session_id: str) -> Session | None:
     doc = pg_utils.find_one(db_manager.sessions(), session_id)
     return Session.from_doc(doc) if doc else None

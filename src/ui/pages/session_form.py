@@ -240,6 +240,22 @@ def _show_exercise_form(
                 suffix="seconds",
             ).classes("w-full sm:flex-1")
 
+        def prefill_effort(name: str, variant: str) -> None:
+            # Only for a fresh row - editing an existing one keeps its own values.
+            if existing_ex is not None or not name:
+                return
+            last = session_model.get_last_used(name, variant)
+            if not last:
+                return
+            rest_before_in.value = last.rest_before
+            sets_in.value = last.sets
+            rest_in.value = last.rest_seconds
+            reps_in.value = last.reps
+            duration_in.value = last.duration
+
+        name_sel.on_value_change(lambda e: prefill_effort(e.value or "", ""))
+        variant_sel.on_value_change(lambda e: prefill_effort(name_sel.value or "", e.value or ""))
+
         def clear_effort_errors() -> None:
             clear_error(reps_in)
             clear_error(duration_in)

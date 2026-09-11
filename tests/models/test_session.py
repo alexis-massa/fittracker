@@ -127,3 +127,33 @@ def test_get_last_completed_skips_incomplete_and_picks_most_recent(
     assert last is not None
     assert last.date == "2026-02-01"
     assert last.weight == 68.0
+
+
+def test_get_last_used_returns_none_when_never_used(sessions_table: PgTable) -> None:
+    assert session.get_last_used("A", "") is None
+
+
+def test_get_last_used_finds_match_across_groups_and_sessions(sessions_table: PgTable) -> None:
+    session.create(Session(date="2026-01-01", workout=[SessionExercise(name="A", sets=3)]))
+    session.create(Session(date="2026-02-01", warmup=[SessionExercise(name="A", sets=5)]))
+    last = session.get_last_used("A", "")
+    assert last is not None
+    assert last.sets == 5
+
+
+def test_get_last_used_prefers_exact_variant_match(sessions_table: PgTable) -> None:
+    session.create(
+        Session(
+            date="2026-02-01",
+            workout=[SessionExercise(name="A", variant_name="1", sets=3)],
+        )
+    )
+    session.create(
+        Session(
+            date="2026-01-01",
+            workout=[SessionExercise(name="A", variant_name="2", sets=7)],
+        )
+    )
+    last = session.get_last_used("A", "2")
+    assert last is not None
+    assert last.sets == 7
