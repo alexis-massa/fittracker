@@ -30,8 +30,6 @@ services:
       # Override just the host so this works out of the box in Compose -
       # .env's DATABASE_URL stays "localhost" for running main.py directly.
       DATABASE_URL: postgresql://fittracker:fittracker@db:5432/fittracker
-    depends_on:
-      - db
 
 volumes:
   pgdata:

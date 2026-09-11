@@ -6,6 +6,7 @@ appended automatically to `[Unreleased]` by a commit hook (see
 [README.md](README.md)); versions are cut and tagged on `main` by hand.
 
 ## [Unreleased]
+- fix: drop app's depends_on db, which broke compose validation without the dev profile
 - chore: remove release commit's self-referential changelog entry
 
 ## [0.2.0] - 2026-09-11
