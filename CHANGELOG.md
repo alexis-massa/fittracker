@@ -6,6 +6,7 @@ appended automatically to `[Unreleased]` by a commit hook (see
 [README.md](README.md)); versions are cut and tagged on `main` by hand.
 
 ## [Unreleased]
+- feat: add Start button to sessions list
 - feat: reflect on a session after running it, not before
 - feat: reflect on a session after running it, not before
 - chore: exclude dev dependencies from the production image

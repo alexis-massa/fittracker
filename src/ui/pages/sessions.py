@@ -43,6 +43,9 @@ def render() -> None:
                     ui.label(s.date).classes("text-subtitle1 text-weight-bold")
                     ui.label(f"{exercise_summary} · {status}").classes("text-caption opacity-70")
                 with ui.row().classes("items-center gap-2"):
+                    btn_primary(
+                        "Start", on_click=lambda sid_=sid: ui.navigate.to(f"/sessions/{sid_}/run")
+                    )
                     btn_ghost(
                         "Duplicate",
                         on_click=lambda sid_=sid: ui.navigate.to(f"/sessions/{sid_}/duplicate"),
