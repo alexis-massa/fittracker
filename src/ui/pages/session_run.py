@@ -181,7 +181,9 @@ def _render_reflect(s: Session, state: _RunState, refresh: Callable[[], None]) -
         state.saved = True
         refresh()
 
-    btn_primary("Save", on_click=save)
+    with ui.row().classes("items-center gap-2"):
+        btn_primary("Save", on_click=save)
+        btn_ghost("Skip", on_click=lambda: ui.navigate.to(f"/sessions/{s.id}"))
 
 
 def _render_saved(s: Session) -> None:
