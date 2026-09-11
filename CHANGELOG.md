@@ -6,7 +6,7 @@ appended automatically to `[Unreleased]` by a commit hook (see
 [README.md](README.md)); versions are cut and tagged on `main` by hand.
 
 ## [Unreleased]
-- chore: release v0.2.0
+- chore: remove release commit's self-referential changelog entry
 
 ## [0.2.0] - 2026-09-11
 - feat: add exercise pictograms and clean up variant list display
