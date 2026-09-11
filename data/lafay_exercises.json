@@ -1,0 +1,194 @@
+[
+  {
+    "name": "A",
+    "label": "Pectoraux, triceps, épaules (pompes)",
+    "variants": [
+      { "name": "1", "label": "Pieds légèrement surélevés" },
+      { "name": "2", "label": "Pieds surélevés (chaise basse)" },
+      { "name": "3", "label": "Pieds surélevés (chaise haute)" },
+      { "name": "4", "label": "Mains et pieds surélevés, prise large" },
+      { "name": "5", "label": "Mains et pieds surélevés, buste droit" },
+      { "name": "6", "label": "Mains et pieds surélevés, buste incliné" },
+      { "name": "7", "label": "Mains et pieds très surélevés" },
+      { "name": "8", "label": "Amplitude complète, appui élevé" },
+      { "name": "9", "label": "Prise serrée (mains proches)" },
+      { "name": "10", "label": "Prise serrée, mouvement circulaire" },
+      { "name": "11", "label": "Prise serrée, buste basculant" },
+      { "name": "12", "label": "Pieds à 1-1,10 m, prise serrée (40 cm)" }
+    ]
+  },
+  {
+    "name": "B",
+    "label": "Pectoraux (haut), épaules, triceps (dips)",
+    "variants": [
+      { "name": "1", "label": "Amplitude à mi-course" },
+      { "name": "2", "label": "Amplitude au quart, rythme rapide" }
+    ]
+  },
+  {
+    "name": "C",
+    "label": "Milieu du dos, biceps (traction/rowing)",
+    "variants": [
+      { "name": "1", "label": "Traction supination, amplitude 1/2" },
+      { "name": "2", "label": "Traction supination, amplitude 2/3" },
+      { "name": "3", "label": "Traction supination, amplitude complète" },
+      { "name": "4", "label": "Rowing horizontal, pieds au sol" },
+      { "name": "5", "label": "Rowing horizontal, pieds sur chaise" },
+      { "name": "6", "label": "Rowing horizontal, pieds surélevés" },
+      { "name": "7", "label": "Rowing horizontal pronation, pieds au sol" },
+      { "name": "8", "label": "Rowing horizontal pronation, pieds sur chaise" },
+      { "name": "9", "label": "Rowing horizontal pronation, pieds surélevés" }
+    ]
+  },
+  {
+    "name": "D",
+    "label": "Triceps (extension entre deux chaises)",
+    "variants": []
+  },
+  {
+    "name": "E",
+    "label": "Cuisses, fessiers (squat unijambiste)",
+    "variants": [
+      { "name": "1", "label": "Assisté au montant de porte, amplitude partielle" },
+      { "name": "2", "label": "Assisté au montant de porte, plus profond" },
+      { "name": "3", "label": "Assisté au montant de porte, amplitude complète" },
+      { "name": "4", "label": "Fente latérale alternée (cosaque)" },
+      { "name": "5", "label": "Fente latérale alternée, plus profonde" },
+      { "name": "6", "label": "Squat pieds joints à écartés, maintien" },
+      { "name": "7", "label": "Dos au mur, aide des mains en bas de mouvement" }
+    ]
+  },
+  {
+    "name": "F",
+    "label": "Cuisses, mollets (squat sauté)",
+    "variants": [
+      { "name": "1", "label": "Gainage mural assis (chaise imaginaire)" },
+      { "name": "2", "label": "Gainage mural, jambes écartées" },
+      { "name": "3", "label": "Gainage mural, une jambe" }
+    ]
+  },
+  {
+    "name": "G",
+    "label": "Abdominaux (partie haute, crunch)",
+    "variants": []
+  },
+  {
+    "name": "H",
+    "label": "Abdominaux (partie basse, relevé de jambes suspendu)",
+    "variants": []
+  },
+  {
+    "name": "I",
+    "label": "Largeur du dos (traction prise large)",
+    "variants": [
+      { "name": "1", "label": "Nuque, amplitude 1/2" },
+      { "name": "2", "label": "Devant, amplitude complète" },
+      { "name": "3", "label": "Devant, prise mains vers l'avant" },
+      { "name": "4", "label": "Devant, menton au-dessus de la barre" },
+      { "name": "5", "label": "Devant, prise mains face à face" },
+      { "name": "6", "label": "Rowing prise large, pieds au sol (3 niveaux)" },
+      { "name": "7", "label": "Devant, amplitude 2/3" },
+      { "name": "8", "label": "Rowing prise large pronation (3 niveaux)" }
+    ]
+  },
+  {
+    "name": "J",
+    "label": "Épaules, haut des pectoraux (pompe piquée)",
+    "variants": [
+      { "name": "1", "label": "Mains rapprochées" },
+      { "name": "2", "label": "Mains rapprochées, appui sur les poings" },
+      { "name": "3", "label": "Mains très rapprochées, appui sur les poings" }
+    ]
+  },
+  {
+    "name": "K",
+    "label": "Triceps (extension coudes au sol)",
+    "variants": [
+      { "name": "1", "label": "Incliné sur table/bureau" },
+      { "name": "2", "label": "Debout contre un mur (6 niveaux)" },
+      { "name": "3", "label": "Barre suspendue entre deux chaises" }
+    ]
+  },
+  {
+    "name": "L",
+    "label": "Pectoraux, épaules, triceps (pompe pivotante)",
+    "variants": []
+  },
+  {
+    "name": "M",
+    "label": "Bas du dos (extension lombaire)",
+    "variants": [
+      { "name": "1", "label": "Debout, sans support (hip hinge)" }
+    ]
+  },
+  {
+    "name": "N",
+    "label": "Obliques (relevé de buste latéral)",
+    "variants": [
+      { "name": "1", "label": "Au sol, sans support" }
+    ]
+  },
+  {
+    "name": "O",
+    "label": "Abdominaux, obliques (crunch croisé)",
+    "variants": []
+  },
+  {
+    "name": "P",
+    "label": "Abdominaux (crunch, jambes fléchies)",
+    "variants": []
+  },
+  {
+    "name": "Q",
+    "label": "Épaules, triceps, haut des pectoraux (pompe latérale)",
+    "variants": [
+      { "name": "1", "label": "Une main au sol, jambe tendue" },
+      { "name": "2", "label": "Au sol, sans aucun support" }
+    ]
+  },
+  {
+    "name": "R",
+    "label": "Trapèzes, cou (haussement d'épaules suspendu)",
+    "variants": []
+  },
+  {
+    "name": "S",
+    "label": "Cou (extension de nuque, allongé)",
+    "variants": []
+  },
+  {
+    "name": "T",
+    "label": "Obliques, abdominaux (rotation du buste assis)",
+    "variants": []
+  },
+  {
+    "name": "U",
+    "label": "Abdominaux, souplesse de la colonne (enroulé)",
+    "variants": []
+  },
+  {
+    "name": "V",
+    "label": "Muscles de la taille, souplesse de la colonne (natation)",
+    "variants": []
+  },
+  {
+    "name": "W",
+    "label": "Mollets (extension unijambiste)",
+    "variants": []
+  },
+  {
+    "name": "X",
+    "label": "Muscles de la taille, souplesse de la colonne (rotation debout)",
+    "variants": []
+  },
+  {
+    "name": "Y",
+    "label": "Cou (rotation de la nuque, allongé)",
+    "variants": []
+  },
+  {
+    "name": "Z",
+    "label": "Souplesse de la colonne vertébrale (le pont)",
+    "variants": []
+  }
+]

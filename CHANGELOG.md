@@ -6,6 +6,7 @@ appended automatically to `[Unreleased]` by a commit hook (see
 [README.md](README.md)); versions are cut and tagged on `main` by hand.
 
 ## [Unreleased]
+- feat: add Lafay exercise dataset and seeding script
 - feat: carry over sets/reps/rest from an exercise's last use
 - feat: show live exercise counts in session-form group headers
 - feat: carry over last logged weight into a fresh reflection
