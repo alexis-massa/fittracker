@@ -8,6 +8,7 @@ from src.ui.components import btn_ghost
 from src.ui.components import btn_primary
 from src.ui.components import card_row
 from src.ui.components import confirm_dialog
+from src.ui.components import exercise_pictogram
 from src.ui.components import page_title
 from src.ui.components import section_title
 from src.ui.components import tag
@@ -74,21 +75,19 @@ def _exercise_group(title: str, exercises: list[SessionExercise], dim: bool = Fa
 
 def _exercise_row(ex: SessionExercise, dim: bool = False) -> None:
     opacity = "opacity:0.5;" if dim else ""
-    with (
-        card_row().style(opacity),
-        ui.row().classes("w-full items-center"),
-        ui.column().classes("flex-1").style("gap:3px"),
-    ):
-        with ui.row().classes("items-center gap-2"):
-            ui.label(ex.short_name).classes("text-subtitle1 text-weight-bold")
-            if ex.variant_name:
-                tag(ex.variant_name, accent=True)
-            if ex.label or ex.variant_label:
-                desc = " / ".join(filter(None, [ex.label, ex.variant_label]))
-                ui.label(desc).classes("text-caption opacity-70")
-        ui.label(f"{ex.sets} sets · {ex.reps} reps · {ex.rest_seconds}s rest").classes(
-            "text-caption opacity-70"
-        )
+    with card_row().style(opacity), ui.row().classes("w-full items-center"):
+        exercise_pictogram(ex.name)
+        with ui.column().classes("flex-1").style("gap:3px"):
+            with ui.row().classes("items-center gap-2"):
+                ui.label(ex.short_name).classes("text-subtitle1 text-weight-bold")
+                if ex.variant_name:
+                    tag(ex.variant_name, accent=True)
+                if ex.label or ex.variant_label:
+                    desc = " / ".join(filter(None, [ex.label, ex.variant_label]))
+                    ui.label(desc).classes("text-caption opacity-70")
+            ui.label(f"{ex.sets} sets · {ex.reps} reps · {ex.rest_seconds}s rest").classes(
+                "text-caption opacity-70"
+            )
 
 
 def _delete(session_id: str) -> None:

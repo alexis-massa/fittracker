@@ -13,6 +13,7 @@ from src.ui.components import action_row
 from src.ui.components import btn_danger
 from src.ui.components import btn_ghost
 from src.ui.components import btn_primary
+from src.ui.components import exercise_pictogram
 from src.ui.components import form_card
 from src.ui.components import number_field
 from src.ui.components import page_title
@@ -107,6 +108,7 @@ def _exercise_row(
             ui.button(
                 icon="expand_more", on_click=lambda idx=index: _move(ex_list, idx, 1, refresh)
             ).props("size=sm square outline")
+        exercise_pictogram(ex.name)
         with ui.column().classes("flex-1").style("gap:1px"):
             with ui.row().classes("items-center gap-2"):
                 ui.label(ex.short_name).classes("text-subtitle1 text-weight-bold")

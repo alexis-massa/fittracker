@@ -6,6 +6,7 @@ from src.ui.components.btn_primary import btn_primary
 from src.ui.components.card_row import card_row
 from src.ui.components.confirm_dialog import confirm_dialog
 from src.ui.components.date_field import date_field
+from src.ui.components.exercise_pictogram import exercise_pictogram
 from src.ui.components.form_card import form_card
 from src.ui.components.input_field import input_field
 from src.ui.components.number_field import number_field
@@ -25,6 +26,7 @@ __all__ = [
     "card_row",
     "confirm_dialog",
     "date_field",
+    "exercise_pictogram",
     "form_card",
     "input_field",
     "number_field",

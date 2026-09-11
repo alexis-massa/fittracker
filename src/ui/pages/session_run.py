@@ -9,6 +9,7 @@ from src.models.exercise import SessionExercise
 from src.models.session import Session
 from src.ui.components import btn_ghost
 from src.ui.components import btn_primary
+from src.ui.components import exercise_pictogram
 from src.ui.components import form_card
 from src.ui.components import page_title
 from src.ui.components import tag
@@ -149,6 +150,7 @@ def _render_phase(
     if ex.label or ex.variant_label:
         desc = " / ".join(filter(None, [ex.label, ex.variant_label]))
         ui.label(desc).classes("text-caption opacity-70 q-mb-md")
+    exercise_pictogram(ex.name, size="96px")
 
     if phase.kind == "rest":
         ui.label("REST").classes("text-caption opacity-70")
