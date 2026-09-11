@@ -2,31 +2,28 @@
 from collections.abc import Callable
 
 from nicegui import ui
-from nicegui.elements.mixins.validation_element import ValidationElement
 
 from src.models import session as session_model
 from src.models.exercise import ExerciseDefinition
 from src.models.exercise import ExerciseVariant
 from src.models.exercise import SessionExercise
 from src.models.exercise import get_all as get_library
-from src.models.session import EnergyLevel
-from src.models.session import ProgressEnum
 from src.models.session import Session
 from src.ui.components import action_row
 from src.ui.components import btn_danger
 from src.ui.components import btn_ghost
 from src.ui.components import btn_primary
-from src.ui.components import date_field
 from src.ui.components import form_card
 from src.ui.components import number_field
 from src.ui.components import page_title
 from src.ui.components import section_title
 from src.ui.components import select_field
-from src.ui.components import textarea_field
+from src.ui.components.session_info_fields import SessionInfoInputs
+from src.ui.components.session_info_fields import apply_session_info
+from src.ui.components.session_info_fields import session_info_fields
 from src.ui.pages.exercise_create_form import exercise_create_form
-
-_ENERGY_OPTIONS: dict[int, str] = {e.value: e.name.replace("_", " ").title() for e in EnergyLevel}
-_PROGRESS_OPTIONS: dict[str, str] = {p.value: p.value.title() for p in ProgressEnum}
+from src.ui.validation import clear_error
+from src.ui.validation import flag_error
 
 
 def render(session_id: str | None, duplicate_from: str | None = None) -> None:
@@ -44,35 +41,14 @@ def render(session_id: str | None, duplicate_from: str | None = None) -> None:
             "Duplicate Session" if is_duplicate else ("Edit Session" if existing else "New Session")
         )
 
-        section_title("Session info")
-        with form_card(), ui.row().classes("w-full items-center gap-4 flex-wrap"):
-            date_in = date_field("Date", value=existing.date if existing else None).classes(
-                "flex-1"
-            )
-            date_in.on_value_change(lambda: _clear_error(date_in))
-            weight_in = number_field(
-                "Weight (kg)",
-                value=existing.weight if existing and existing.weight is not None else 0.0,
-                min=0,
-                max=999,
-                step=0.1,
-            ).classes("flex-1")
-            energy_in = select_field(
-                "Energy",
-                options=_ENERGY_OPTIONS,
-                value=existing.energy_level.value
-                if existing and existing.energy_level
-                else EnergyLevel.MEDIUM.value,
-            ).classes("flex-1")
-            progress_in = select_field(
-                "Progress",
-                options=_PROGRESS_OPTIONS,
-                value=existing.progress.value if existing else ProgressEnum.MAINTAIN.value,
-            ).classes("flex-1")
-            notes_in = textarea_field(
-                "Notes",
-                value=existing.notes if existing and existing.notes is not None else "",
-            ).classes("flex-1")
+        # Only shown when editing something that already exists - a fresh
+        # plan (new or duplicated) has nothing to reflect on yet. See
+        # session_run.py, where that reflection normally happens instead.
+        info: SessionInfoInputs | None = None
+        if existing is not None:
+            section_title("Session info")
+            with form_card(), ui.row().classes("w-full items-center gap-4 flex-wrap"):
+                info = session_info_fields(existing)
 
         _exercise_group("Warmup", warmup_exs)
         _exercise_group("Workout", workout_exs)
@@ -82,15 +58,7 @@ def render(session_id: str | None, duplicate_from: str | None = None) -> None:
             btn_primary(
                 "Save Session",
                 on_click=lambda: _save(
-                    session_id,
-                    date_in,
-                    weight_in,
-                    energy_in,
-                    progress_in,
-                    notes_in,
-                    warmup_exs,
-                    workout_exs,
-                    stretch_exs,
+                    session_id, existing, info, warmup_exs, workout_exs, stretch_exs
                 ),
             )
             btn_ghost("Cancel", on_click=lambda: ui.navigate.to("/"))
@@ -204,7 +172,7 @@ def _show_exercise_form(
             ).classes("flex-1")
 
         def on_name_change(value: str | None) -> None:
-            _clear_error(name_sel)
+            clear_error(name_sel)
             name = value or ""
             variant_sel.options = variant_opts(name)
             variant_sel.value = None
@@ -271,24 +239,24 @@ def _show_exercise_form(
             ).classes("w-full sm:flex-1")
 
         def clear_effort_errors() -> None:
-            _clear_error(reps_in)
-            _clear_error(duration_in)
+            clear_error(reps_in)
+            clear_error(duration_in)
 
         reps_in.on_value_change(clear_effort_errors)
         duration_in.on_value_change(clear_effort_errors)
 
         def save() -> None:
-            _clear_error(name_sel)
+            clear_error(name_sel)
             name = (name_sel.value or "").strip()
             variant_name = (variant_sel.value or "").strip() or None
 
             if not name:
-                _flag_error(name_sel, "Exercise name is required")
+                flag_error(name_sel, "Exercise name is required")
                 ui.notify("Exercise name is required", color="negative")
                 return
             if reps_in.value != 0 and duration_in.value != 0:
-                _flag_error(reps_in, "Choose reps or duration, not both")
-                _flag_error(duration_in, "Choose reps or duration, not both")
+                flag_error(reps_in, "Choose reps or duration, not both")
+                flag_error(duration_in, "Choose reps or duration, not both")
                 ui.notify("Fill Reps OR Duration — not both", color="negative")
                 return
 
@@ -331,14 +299,6 @@ def _show_exercise_form(
 # ---------------------------------------------------------------------------
 
 
-def _flag_error(field: ValidationElement, message: str) -> None:
-    field.error = message
-
-
-def _clear_error(field: ValidationElement) -> None:
-    field.error = None
-
-
 def _remove(ex_list: list[SessionExercise], index: int, refresh: Callable[[], None]) -> None:
     ex_list.pop(index)
     refresh()
@@ -360,37 +320,25 @@ def _move(
 
 def _save(
     session_id: str | None,
-    date_in: ui.input,
-    weight_in: ui.number,
-    energy_in: ui.select,
-    progress_in: ui.select,
-    notes_in: ui.textarea,
+    existing: Session | None,
+    info: SessionInfoInputs | None,
     warmup_exs: list[SessionExercise],
     workout_exs: list[SessionExercise],
     stretch_exs: list[SessionExercise],
 ) -> None:
-    _clear_error(date_in)
-    if not str(date_in.value).strip():
-        _flag_error(date_in, "Date is required")
-        ui.notify("Date is required", color="negative")
+    s = existing or Session()
+    if info is not None and not apply_session_info(s, info):
         return
 
-    s = Session(
-        date=str(date_in.value).strip(),
-        weight=float(weight_in.value) if weight_in.value else None,
-        energy_level=EnergyLevel(int(energy_in.value)) if energy_in.value else None,
-        progress=ProgressEnum(progress_in.value),
-        notes=notes_in.value.strip() or None,
-        warmup=list(warmup_exs),
-        workout=list(workout_exs),
-        stretches=list(stretch_exs),
-    )
+    s.warmup = list(warmup_exs)
+    s.workout = list(workout_exs)
+    s.stretches = list(stretch_exs)
 
     if session_id:
         session_model.update(session_id, s)
         ui.notify("Session updated", color="positive")
+        ui.navigate.to(f"/sessions/{session_id}")
     else:
-        session_model.create(s)
-        ui.notify("Session saved", color="positive")
-
-    ui.navigate.to("/")
+        new_id = session_model.create(s)
+        ui.notify("Plan saved", color="positive")
+        ui.navigate.to(f"/sessions/{new_id}")

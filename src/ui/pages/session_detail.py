@@ -29,14 +29,19 @@ def render(session_id: str | None) -> None:
         ui.element("div").classes("q-mb-sm")
         page_title(f"Session — {s.date}")
 
-        energy_str = s.energy_level.name.replace("_", " ").title() if s.energy_level else "—"
         with ui.row().classes("items-center gap-6 flex-wrap q-mb-lg"):
-            ui.label(f"Energy: {energy_str}").classes("text-caption opacity-70")
-            ui.label(f"Progress: {s.progress.value.title()}").classes("text-caption opacity-70")
-            if s.weight:
-                ui.label(f"{s.weight} kg").classes("text-caption opacity-70")
-            if s.notes:
-                ui.label(s.notes).classes("text-caption opacity-70").style("font-style:italic")
+            if s.completed:
+                energy_str = (
+                    s.energy_level.name.replace("_", " ").title() if s.energy_level else "—"
+                )
+                ui.label(f"Energy: {energy_str}").classes("text-caption opacity-70")
+                ui.label(f"Progress: {s.progress.value.title()}").classes("text-caption opacity-70")
+                if s.weight:
+                    ui.label(f"{s.weight} kg").classes("text-caption opacity-70")
+                if s.notes:
+                    ui.label(s.notes).classes("text-caption opacity-70").style("font-style:italic")
+            else:
+                tag("Not completed yet")
 
         ui.separator().classes("q-my-md")
 
