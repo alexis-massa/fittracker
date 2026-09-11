@@ -25,18 +25,23 @@ def render() -> None:
 
         for s in sessions:
             sid = s.id
-            energy_str = s.energy_level.name.replace("_", " ").title() if s.energy_level else "—"
+            exercise_summary = (
+                f"{pluralize(len(s.workout), 'exercise')} · "
+                f"{pluralize(len(s.warmup), 'warmup')} · "
+                f"{pluralize(len(s.stretches), 'stretch', 'stretches')}"
+            )
+            if s.completed:
+                energy_str = (
+                    s.energy_level.name.replace("_", " ").title() if s.energy_level else "—"
+                )
+                status = f"{energy_str} energy · {s.progress.value.title()}"
+            else:
+                status = "Not completed yet"
 
             with card_row(), ui.row().classes("w-full items-center justify-between"):
                 with ui.column().style("gap:3px"):
                     ui.label(s.date).classes("text-subtitle1 text-weight-bold")
-                    ui.label(
-                        f"{pluralize(len(s.workout), 'exercise')} · "
-                        f"{pluralize(len(s.warmup), 'warmup')} · "
-                        f"{pluralize(len(s.stretches), 'stretch', 'stretches')} · "
-                        f"{energy_str} energy · "
-                        f"{s.progress.value.title()}"
-                    ).classes("text-caption opacity-70")
+                    ui.label(f"{exercise_summary} · {status}").classes("text-caption opacity-70")
                 with ui.row().classes("items-center gap-2"):
                     btn_ghost(
                         "Duplicate",

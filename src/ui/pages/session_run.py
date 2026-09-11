@@ -9,8 +9,11 @@ from src.models.exercise import SessionExercise
 from src.models.session import Session
 from src.ui.components import btn_ghost
 from src.ui.components import btn_primary
+from src.ui.components import form_card
 from src.ui.components import page_title
 from src.ui.components import tag
+from src.ui.components.session_info_fields import apply_session_info
+from src.ui.components.session_info_fields import session_info_fields
 
 
 @dataclass
@@ -29,6 +32,7 @@ class _RunState:
     index: int = 0
     remaining: int = 0
     paused: bool = False
+    saved: bool = False
 
 
 def render(session_id: str | None) -> None:
@@ -80,7 +84,10 @@ def render(session_id: str | None) -> None:
             content.clear()
             with content:
                 if state.index >= len(phases):
-                    _render_complete(s)
+                    if state.saved:
+                        _render_saved(s)
+                    else:
+                        _render_reflect(s, state, refresh)
                 else:
                     _render_phase(phases[state.index], state, advance, toggle_pause)
 
@@ -161,8 +168,24 @@ def _render_phase(
             btn_ghost("Skip", on_click=advance)
 
 
-def _render_complete(s: Session) -> None:
-    ui.label("Session complete").classes("text-h5 text-weight-bold q-mb-md")
+def _render_reflect(s: Session, state: _RunState, refresh: Callable[[], None]) -> None:
+    ui.label("Session complete — how did it go?").classes("text-h5 text-weight-bold q-mb-md")
+    with form_card(), ui.row().classes("w-full items-center gap-4 flex-wrap"):
+        info = session_info_fields(s)
+
+    def save() -> None:
+        if not apply_session_info(s, info):
+            return
+        session_model.update(s.id, s)
+        ui.notify("Session saved", color="positive")
+        state.saved = True
+        refresh()
+
+    btn_primary("Save", on_click=save)
+
+
+def _render_saved(s: Session) -> None:
+    ui.label("Session saved").classes("text-h5 text-weight-bold q-mb-md")
     with ui.row().classes("items-center gap-2"):
         btn_primary("Back to session", on_click=lambda: ui.navigate.to(f"/sessions/{s.id}"))
         btn_ghost("All sessions", on_click=lambda: ui.navigate.to("/"))

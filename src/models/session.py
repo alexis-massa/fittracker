@@ -34,6 +34,9 @@ class Session:
     warmup: list[SessionExercise] = field(default_factory=list[SessionExercise])
     workout: list[SessionExercise] = field(default_factory=list[SessionExercise])
     stretches: list[SessionExercise] = field(default_factory=list[SessionExercise])
+    # False for a plan not yet run - energy/weight/progress/notes/date are
+    # meaningless placeholders until it is (see session_info_fields.py).
+    completed: bool = False
     _id: str = field(default="", repr=False)
 
     @property
@@ -55,6 +58,7 @@ class Session:
             warmup=build(doc.get("warmup", [])),
             workout=build(doc.get("workout", [])),
             stretches=build(doc.get("stretches", [])),
+            completed=doc.get("completed", False),
         )
 
     def to_doc(self) -> dict[str, Any]:
@@ -67,6 +71,7 @@ class Session:
             "warmup": [e.to_doc() for e in self.warmup],
             "workout": [e.to_doc() for e in self.workout],
             "stretches": [e.to_doc() for e in self.stretches],
+            "completed": self.completed,
         }
 
 
