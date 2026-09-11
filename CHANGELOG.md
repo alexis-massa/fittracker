@@ -6,6 +6,9 @@ appended automatically to `[Unreleased]` by a commit hook (see
 [README.md](README.md)); versions are cut and tagged on `main` by hand.
 
 ## [Unreleased]
+- chore: release v0.2.0
+
+## [0.2.0] - 2026-09-11
 - feat: add exercise pictograms and clean up variant list display
 - feat: add Lafay exercise dataset and seeding script
 - feat: carry over sets/reps/rest from an exercise's last use
@@ -14,10 +17,14 @@ appended automatically to `[Unreleased]` by a commit hook (see
 - feat: add Skip option to the post-run reflection screen
 - feat: add Start button to sessions list
 - feat: reflect on a session after running it, not before
-- feat: reflect on a session after running it, not before
 - chore: exclude dev dependencies from the production image
 - feat: migrate storage from MongoDB to shared Postgres
 - chore: config for a common caddy docker
+- feat: add guided session runner with rest/work timers
+- fix: use NiceGUI's validation API instead of raw error props
+- fix: preserve explicit zero for reps/duration/rest fields on save
+- fix: add missing /sessions/{id}/duplicate route
+- docs: credit the Lafay method as the training model
 
 ## [0.1.0] - 2026-09-09
 - ci: add GitHub Actions workflow for lint, type check, and tests
