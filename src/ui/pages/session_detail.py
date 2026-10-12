@@ -80,8 +80,6 @@ def _exercise_row(ex: SessionExercise, dim: bool = False) -> None:
         with ui.column().classes("flex-1").style("gap:3px"):
             with ui.row().classes("items-center gap-2"):
                 ui.label(ex.short_name).classes("text-subtitle1 text-weight-bold")
-                if ex.variant_name:
-                    tag(ex.variant_name, accent=True)
                 if ex.label or ex.variant_label:
                     desc = " / ".join(filter(None, [ex.label, ex.variant_label]))
                     ui.label(desc).classes("text-caption opacity-70")
