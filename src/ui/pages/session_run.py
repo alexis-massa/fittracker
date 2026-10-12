@@ -12,7 +12,6 @@ from src.ui.components import btn_primary
 from src.ui.components import exercise_pictogram
 from src.ui.components import form_card
 from src.ui.components import page_title
-from src.ui.components import tag
 from src.ui.components.session_info_fields import apply_session_info
 from src.ui.components.session_info_fields import session_info_fields
 
@@ -143,10 +142,7 @@ def _render_phase(
     ui.label(
         f"{phase.group.upper()} · exercise {phase.exercise_index + 1}/{phase.total_exercises}"
     ).classes("text-caption opacity-70")
-    with ui.row().classes("items-center gap-2 q-mb-sm"):
-        ui.label(ex.short_name).classes("text-h5 text-weight-bold")
-        if ex.variant_name:
-            tag(ex.variant_name, accent=True)
+    ui.label(ex.short_name).classes("text-h5 text-weight-bold q-mb-sm")
     if ex.label or ex.variant_label:
         desc = " / ".join(filter(None, [ex.label, ex.variant_label]))
         ui.label(desc).classes("text-caption opacity-70 q-mb-md")
