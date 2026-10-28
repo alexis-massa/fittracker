@@ -6,7 +6,9 @@ appended automatically to `[Unreleased]` by a commit hook (see
 [README.md](README.md)); versions are cut and tagged on `main` by hand.
 
 ## [Unreleased]
-- chore: release v0.3.0
+- chore: remove release commit's self-referential changelog entry
+
+## [0.3.0] - 2026-10-28
 - feat: make FitTracker installable as a mobile home-screen app
 
 ## [0.2.1] - 2026-10-12
