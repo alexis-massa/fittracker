@@ -14,6 +14,12 @@ from src.ui.pages.session_form import render as session_form_page
 from src.ui.pages.session_run import render as session_run_page
 from src.ui.pages.sessions import render as sessions_page
 
+app.add_static_files("/static", "static")
+# Served at the root (not under /static) so its default scope covers the
+# whole app - a worker scoped to /static/ can't control the "/" start_url,
+# which Chrome's install-prompt eligibility check requires.
+app.add_static_file(local_file="static/sw.js", url_path="/sw.js")
+
 
 @app.on_startup
 async def startup() -> None:
@@ -83,4 +89,5 @@ if __name__ in {"__main__", "__mp_main__"}:
         dark=prefs.dark_mode,
         reload=not is_prod,
         show=not is_prod,
+        favicon="static/icons/favicon-32.png",
     )

@@ -6,6 +6,9 @@ appended automatically to `[Unreleased]` by a commit hook (see
 [README.md](README.md)); versions are cut and tagged on `main` by hand.
 
 ## [Unreleased]
+- feat: make FitTracker installable as a mobile home-screen app
+- fix: stop showing the exercise variant number twice in session views
+- fix: drop app's depends_on db, which broke compose validation without the dev profile
 - chore: remove release commit's self-referential changelog entry
 
 ## [0.2.1] - 2026-10-12
