@@ -9,6 +9,7 @@ from collections.abc import Callable
 
 from nicegui import ui
 
+from src.auth import current_user_id
 from src.models.exercise import ExerciseDefinition
 from src.models.exercise import ExerciseVariant
 from src.models.exercise import create as create_definition
@@ -88,7 +89,7 @@ def exercise_create_form(
                 label=dl_in.value.strip(),
                 variants=[v for v in new_variants if v.name.strip()],
             )
-            create_definition(new_defn)
+            create_definition(current_user_id(), new_defn)
             ui.notify(f"'{new_defn.display_name}' added to library", color="positive")
             create_card.delete()
             on_done(new_defn)

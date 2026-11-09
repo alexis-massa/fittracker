@@ -1,14 +1,17 @@
 # main.py
 from nicegui import app
 from nicegui import ui
+from starlette.responses import RedirectResponse
 
+from src.auth import AuthMiddleware
 from src.config import APP_ENV
 from src.config import APP_PORT
+from src.config import STORAGE_SECRET
 from src.db import db_manager
-import src.preferences as preferences
 from src.ui.layout import render_header
 from src.ui.pages.exercise_form import render as exercise_form_page
 from src.ui.pages.exercises import render as exercises_page
+from src.ui.pages.login import render as login_page
 from src.ui.pages.session_detail import render as session_detail_page
 from src.ui.pages.session_form import render as session_form_page
 from src.ui.pages.session_run import render as session_run_page
@@ -19,6 +22,8 @@ app.add_static_files("/static", "static")
 # whole app - a worker scoped to /static/ can't control the "/" start_url,
 # which Chrome's install-prompt eligibility check requires.
 app.add_static_file(local_file="static/sw.js", url_path="/sw.js")
+# Added before ui.run so it sits inside NiceGUI's session middleware.
+app.add_middleware(AuthMiddleware)
 
 
 @app.on_startup
@@ -29,6 +34,11 @@ async def startup() -> None:
 @app.on_shutdown
 async def shutdown() -> None:
     db_manager.disconnect()
+
+
+@ui.page("/login")
+def login(redirect_to: str = "/") -> RedirectResponse | None:
+    return login_page(redirect_to)
 
 
 @ui.page("/")
@@ -80,14 +90,17 @@ def edit_exercise(exercise_id: str) -> None:
 
 
 if __name__ in {"__main__", "__mp_main__"}:
-    prefs = preferences.load()
     is_prod = APP_ENV == "production"
+    if is_prod and not STORAGE_SECRET:
+        raise RuntimeError("STORAGE_SECRET must be set in production (it signs session cookies).")
     ui.run(
         title="FitTracker",
         host="0.0.0.0",
         port=APP_PORT,
-        dark=prefs.dark_mode,
+        dark=None,
         reload=not is_prod,
         show=not is_prod,
         favicon="static/icons/favicon-32.png",
+        storage_secret=STORAGE_SECRET or "dev-only-insecure-secret",
+        session_middleware_kwargs={"https_only": is_prod, "max_age": 60 * 60 * 24 * 30},
     )

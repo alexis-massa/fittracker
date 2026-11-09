@@ -79,81 +79,120 @@ def test_session_round_trips_through_doc() -> None:
 def test_get_all_returns_sessions_sorted_by_date_descending(sessions_table: PgTable) -> None:
     pg.insert_one(sessions_table, {"date": "2026-01-01", "progress": "MAINTAIN"})
     pg.insert_one(sessions_table, {"date": "2026-02-01", "progress": "MAINTAIN"})
-    assert [s.date for s in session.get_all()] == ["2026-02-01", "2026-01-01"]
+    uid = sessions_table.user_id
+    assert [s.date for s in session.get_all(uid)] == ["2026-02-01", "2026-01-01"]
 
 
 def test_get_by_id_returns_matching_session(sessions_table: PgTable) -> None:
     inserted_id = pg.insert_one(sessions_table, {"date": "2026-01-01", "progress": "MAINTAIN"})
-    found = session.get_by_id(inserted_id)
+    found = session.get_by_id(sessions_table.user_id, inserted_id)
     assert found is not None
     assert found.date == "2026-01-01"
 
 
 def test_get_by_id_returns_none_when_missing(sessions_table: PgTable) -> None:
-    assert session.get_by_id("999999") is None
+    assert session.get_by_id(sessions_table.user_id, "999999") is None
 
 
 def test_create_persists_session_and_returns_id(sessions_table: PgTable) -> None:
-    new_id = session.create(Session(date="2026-01-01"))
-    stored = session.get_by_id(new_id)
+    uid = sessions_table.user_id
+    new_id = session.create(uid, Session(date="2026-01-01"))
+    stored = session.get_by_id(uid, new_id)
     assert stored is not None
     assert stored.date == "2026-01-01"
 
 
 def test_update_modifies_existing_session(sessions_table: PgTable) -> None:
-    new_id = session.create(Session(date="2026-01-01"))
-    assert session.update(new_id, Session(date="2026-01-02")) is True
-    assert session.get_by_id(new_id).date == "2026-01-02"  # type: ignore[union-attr]
+    uid = sessions_table.user_id
+    new_id = session.create(uid, Session(date="2026-01-01"))
+    assert session.update(uid, new_id, Session(date="2026-01-02")) is True
+    assert session.get_by_id(uid, new_id).date == "2026-01-02"  # type: ignore[union-attr]
 
 
 def test_delete_removes_session(sessions_table: PgTable) -> None:
-    new_id = session.create(Session(date="2026-01-01"))
-    assert session.delete(new_id) is True
-    assert session.get_by_id(new_id) is None
+    uid = sessions_table.user_id
+    new_id = session.create(uid, Session(date="2026-01-01"))
+    assert session.delete(uid, new_id) is True
+    assert session.get_by_id(uid, new_id) is None
 
 
 def test_get_last_completed_returns_none_when_none_completed(sessions_table: PgTable) -> None:
-    session.create(Session(date="2026-01-01", completed=False))
-    assert session.get_last_completed() is None
+    uid = sessions_table.user_id
+    session.create(uid, Session(date="2026-01-01", completed=False))
+    assert session.get_last_completed(uid) is None
 
 
 def test_get_last_completed_skips_incomplete_and_picks_most_recent(
     sessions_table: PgTable,
 ) -> None:
-    session.create(Session(date="2026-01-01", weight=70.0, completed=True))
-    session.create(Session(date="2026-03-01", completed=False))
-    session.create(Session(date="2026-02-01", weight=68.0, completed=True))
-    last = session.get_last_completed()
+    uid = sessions_table.user_id
+    session.create(uid, Session(date="2026-01-01", weight=70.0, completed=True))
+    session.create(uid, Session(date="2026-03-01", completed=False))
+    session.create(uid, Session(date="2026-02-01", weight=68.0, completed=True))
+    last = session.get_last_completed(uid)
     assert last is not None
     assert last.date == "2026-02-01"
     assert last.weight == 68.0
 
 
 def test_get_last_used_returns_none_when_never_used(sessions_table: PgTable) -> None:
-    assert session.get_last_used("A", "") is None
+    assert session.get_last_used(sessions_table.user_id, "A", "") is None
 
 
 def test_get_last_used_finds_match_across_groups_and_sessions(sessions_table: PgTable) -> None:
-    session.create(Session(date="2026-01-01", workout=[SessionExercise(name="A", sets=3)]))
-    session.create(Session(date="2026-02-01", warmup=[SessionExercise(name="A", sets=5)]))
-    last = session.get_last_used("A", "")
+    uid = sessions_table.user_id
+    session.create(uid, Session(date="2026-01-01", workout=[SessionExercise(name="A", sets=3)]))
+    session.create(uid, Session(date="2026-02-01", warmup=[SessionExercise(name="A", sets=5)]))
+    last = session.get_last_used(uid, "A", "")
     assert last is not None
     assert last.sets == 5
 
 
 def test_get_last_used_prefers_exact_variant_match(sessions_table: PgTable) -> None:
+    uid = sessions_table.user_id
     session.create(
+        uid,
         Session(
             date="2026-02-01",
             workout=[SessionExercise(name="A", variant_name="1", sets=3)],
-        )
+        ),
     )
     session.create(
+        uid,
         Session(
             date="2026-01-01",
             workout=[SessionExercise(name="A", variant_name="2", sets=7)],
-        )
+        ),
     )
-    last = session.get_last_used("A", "2")
+    last = session.get_last_used(uid, "A", "2")
     assert last is not None
     assert last.sets == 7
+
+
+# ---------------------------------------------------------------------------
+# Per-user isolation
+# ---------------------------------------------------------------------------
+
+
+def test_sessions_are_invisible_to_other_users(sessions_table: PgTable) -> None:
+    owner, other = sessions_table.user_id, sessions_table.user_id + 1
+    new_id = session.create(owner, Session(date="2026-01-01", completed=True))
+    assert session.get_all(other) == []
+    assert session.get_by_id(other, new_id) is None
+    assert session.get_last_completed(other) is None
+
+
+def test_other_users_cannot_update_or_delete_a_session(sessions_table: PgTable) -> None:
+    owner, other = sessions_table.user_id, sessions_table.user_id + 1
+    new_id = session.create(owner, Session(date="2026-01-01"))
+    assert session.update(other, new_id, Session(date="2030-01-01")) is False
+    assert session.delete(other, new_id) is False
+    stored = session.get_by_id(owner, new_id)
+    assert stored is not None
+    assert stored.date == "2026-01-01"
+
+
+def test_last_used_effort_never_leaks_between_users(sessions_table: PgTable) -> None:
+    owner, other = sessions_table.user_id, sessions_table.user_id + 1
+    session.create(owner, Session(workout=[SessionExercise(name="A", sets=9)]))
+    assert session.get_last_used(other, "A", "") is None

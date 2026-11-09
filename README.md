@@ -45,11 +45,54 @@ Then start the local Postgres:
 docker compose up -d db
 ```
 
+Create your login (there is no signup page - see [Users and access](#users-and-access)):
+
+```bash
+uv run python scripts/manage_users.py create YOURNAME
+```
+
 And run the app:
 
 ```bash
 uv run main.py
 ```
+
+## Users and access
+
+The app is private: every page requires a login, and each user has their own
+sessions, exercise library and preferences — nobody can see or touch another
+user's data. Accounts can only be created by whoever runs the admin script, so
+you hand out access yourself:
+
+```bash
+uv run python scripts/manage_users.py create alice     # prompts for a password
+uv run python scripts/manage_users.py passwd alice     # reset a password
+uv run python scripts/manage_users.py list             # who exists, and how much data
+uv run python scripts/manage_users.py delete alice     # removes them and ALL their data
+uv run python scripts/seed_exercises.py alice          # give them the Lafay exercise library
+```
+
+In production, run them inside the container, e.g.
+`docker compose exec app .venv/bin/python scripts/manage_users.py create alice`.
+
+Users can change their own password from the account menu in the header.
+
+**Upgrading from the single-user version:** the first start adds an owner
+column to your existing tables, so take a backup first
+(`pg_dump "$DATABASE_URL" > fittracker-backup.sql`). Existing sessions and
+exercises have no owner, so they stay hidden from everyone until you assign
+them to your account, once, after creating it:
+
+```bash
+uv run python scripts/manage_users.py claim-legacy YOURNAME
+```
+
+Production needs `STORAGE_SECRET` set (a long random string that signs the
+login cookies; the app refuses to start without it — see `.env.example`).
+Logins are stored in the container's filesystem, so everyone has to sign in
+again after a redeploy. The login form is throttled (5 failed attempts per
+username, then a 5-minute lock), and you can drop the Caddy `basic_auth` labels
+in `docker-compose.prod.yml` if you'd rather not have a second login in front.
 
 ## Code quality
 

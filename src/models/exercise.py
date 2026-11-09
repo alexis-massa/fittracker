@@ -140,25 +140,25 @@ class SessionExercise:
 # ---------------------------------------------------------------------------
 
 
-def get_all() -> list[ExerciseDefinition]:
+def get_all(user_id: int) -> list[ExerciseDefinition]:
     return [
         ExerciseDefinition.from_doc(doc)
-        for doc in pg_utils.find_all(db_manager.exercises(), sort_field="name")
+        for doc in pg_utils.find_all(db_manager.exercises(user_id), sort_field="name")
     ]
 
 
-def get_by_id(exercise_id: str) -> ExerciseDefinition | None:
-    doc = pg_utils.find_one(db_manager.exercises(), exercise_id)
+def get_by_id(user_id: int, exercise_id: str) -> ExerciseDefinition | None:
+    doc = pg_utils.find_one(db_manager.exercises(user_id), exercise_id)
     return ExerciseDefinition.from_doc(doc) if doc else None
 
 
-def create(defn: ExerciseDefinition) -> str:
-    return pg_utils.insert_one(db_manager.exercises(), defn.to_doc())
+def create(user_id: int, defn: ExerciseDefinition) -> str:
+    return pg_utils.insert_one(db_manager.exercises(user_id), defn.to_doc())
 
 
-def update(exercise_id: str, defn: ExerciseDefinition) -> bool:
-    return pg_utils.update_one(db_manager.exercises(), exercise_id, defn.to_doc())
+def update(user_id: int, exercise_id: str, defn: ExerciseDefinition) -> bool:
+    return pg_utils.update_one(db_manager.exercises(user_id), exercise_id, defn.to_doc())
 
 
-def delete(exercise_id: str) -> bool:
-    return pg_utils.delete_one(db_manager.exercises(), exercise_id)
+def delete(user_id: int, exercise_id: str) -> bool:
+    return pg_utils.delete_one(db_manager.exercises(user_id), exercise_id)

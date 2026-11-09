@@ -80,21 +80,23 @@ class Session:
 # ---------------------------------------------------------------------------
 
 
-def get_all() -> list[Session]:
+def get_all(user_id: int) -> list[Session]:
     return [
         Session.from_doc(doc)
-        for doc in pg_utils.find_all(db_manager.sessions(), sort_field="date", ascending=False)
+        for doc in pg_utils.find_all(
+            db_manager.sessions(user_id), sort_field="date", ascending=False
+        )
     ]
 
 
-def get_last_completed() -> Session | None:
-    return next((s for s in get_all() if s.completed), None)
+def get_last_completed(user_id: int) -> Session | None:
+    return next((s for s in get_all(user_id) if s.completed), None)
 
 
-def get_last_used(name: str, variant_name: str) -> SessionExercise | None:
+def get_last_used(user_id: int, name: str, variant_name: str) -> SessionExercise | None:
     """Most recent SessionExercise matching `name`, preferring an exact variant match."""
     fallback: SessionExercise | None = None
-    for session in get_all():
+    for session in get_all(user_id):
         for ex in session.warmup + session.workout + session.stretches:
             if ex.name != name:
                 continue
@@ -104,18 +106,18 @@ def get_last_used(name: str, variant_name: str) -> SessionExercise | None:
     return fallback
 
 
-def get_by_id(session_id: str) -> Session | None:
-    doc = pg_utils.find_one(db_manager.sessions(), session_id)
+def get_by_id(user_id: int, session_id: str) -> Session | None:
+    doc = pg_utils.find_one(db_manager.sessions(user_id), session_id)
     return Session.from_doc(doc) if doc else None
 
 
-def create(session: Session) -> str:
-    return pg_utils.insert_one(db_manager.sessions(), session.to_doc())
+def create(user_id: int, session: Session) -> str:
+    return pg_utils.insert_one(db_manager.sessions(user_id), session.to_doc())
 
 
-def update(session_id: str, session: Session) -> bool:
-    return pg_utils.update_one(db_manager.sessions(), session_id, session.to_doc())
+def update(user_id: int, session_id: str, session: Session) -> bool:
+    return pg_utils.update_one(db_manager.sessions(user_id), session_id, session.to_doc())
 
 
-def delete(session_id: str) -> bool:
-    return pg_utils.delete_one(db_manager.sessions(), session_id)
+def delete(user_id: int, session_id: str) -> bool:
+    return pg_utils.delete_one(db_manager.sessions(user_id), session_id)

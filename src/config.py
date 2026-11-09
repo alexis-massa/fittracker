@@ -9,3 +9,4 @@ DATABASE_URL: str = os.getenv(
 )
 APP_PORT: int = int(os.getenv("APP_PORT", "8080"))
 APP_ENV: str = os.getenv("APP_ENV", "development")
+STORAGE_SECRET: str = os.getenv("STORAGE_SECRET", "")

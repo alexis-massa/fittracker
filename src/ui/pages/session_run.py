@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 from nicegui import ui
 
+from src.auth import current_user_id
 from src.models import session as session_model
 from src.models.exercise import SessionExercise
 from src.models.session import Session
@@ -36,7 +37,7 @@ class _RunState:
 
 
 def render(session_id: str | None) -> None:
-    s = session_model.get_by_id(session_id) if session_id else None
+    s = session_model.get_by_id(current_user_id(), session_id) if session_id else None
     if not s:
         ui.label("Session not found.").classes("text-caption opacity-70")
         return
@@ -168,7 +169,7 @@ def _render_phase(
 
 def _render_reflect(s: Session, state: _RunState, refresh: Callable[[], None]) -> None:
     ui.label("Session complete — how did it go?").classes("text-h5 text-weight-bold q-mb-md")
-    last_completed = session_model.get_last_completed()
+    last_completed = session_model.get_last_completed(current_user_id())
     default_weight = last_completed.weight if last_completed else None
     with form_card(), ui.row().classes("w-full items-center gap-4 flex-wrap"):
         info = session_info_fields(s, default_weight=default_weight)
@@ -176,7 +177,7 @@ def _render_reflect(s: Session, state: _RunState, refresh: Callable[[], None]) -
     def save() -> None:
         if not apply_session_info(s, info):
             return
-        session_model.update(s.id, s)
+        session_model.update(current_user_id(), s.id, s)
         ui.notify("Session saved", color="positive")
         state.saved = True
         refresh()

@@ -3,6 +3,7 @@ from collections.abc import Callable
 
 from nicegui import ui
 
+from src.auth import current_user_id
 from src.models import session as session_model
 from src.models.exercise import ExerciseDefinition
 from src.models.exercise import ExerciseVariant
@@ -29,8 +30,14 @@ from src.utils.formatting import pluralize
 
 
 def render(session_id: str | None, duplicate_from: str | None = None) -> None:
-    existing = session_model.get_by_id(session_id) if session_id else None
-    source = existing or (session_model.get_by_id(duplicate_from) if duplicate_from else None)
+    existing = session_model.get_by_id(current_user_id(), session_id) if session_id else None
+    source = existing or (
+        session_model.get_by_id(current_user_id(), duplicate_from) if duplicate_from else None
+    )
+
+    if (session_id or duplicate_from) and source is None:
+        ui.label("Session not found.").classes("text-caption opacity-70")
+        return
 
     warmup_exs: list[SessionExercise] = list(source.warmup if source else [])
     workout_exs: list[SessionExercise] = list(source.workout if source else [])
@@ -136,7 +143,7 @@ def _show_exercise_form(
     refresh: Callable[[], None],
 ) -> None:
     existing_ex = ex_list[edit_index] if edit_index is not None else None
-    library = get_library()
+    library = get_library(current_user_id())
 
     # name → (label, list of ExerciseVariant)
     lib_map: dict[str, tuple[str, list[ExerciseVariant]]] = {}
@@ -246,7 +253,7 @@ def _show_exercise_form(
             # Only for a fresh row - editing an existing one keeps its own values.
             if existing_ex is not None or not name:
                 return
-            last = session_model.get_last_used(name, variant)
+            last = session_model.get_last_used(current_user_id(), name, variant)
             if not last:
                 return
             rest_before_in.value = last.rest_before
@@ -355,10 +362,10 @@ def _save(
     s.stretches = list(stretch_exs)
 
     if session_id:
-        session_model.update(session_id, s)
+        session_model.update(current_user_id(), session_id, s)
         ui.notify("Session updated", color="positive")
         ui.navigate.to(f"/sessions/{session_id}")
     else:
-        new_id = session_model.create(s)
+        new_id = session_model.create(current_user_id(), s)
         ui.notify("Plan saved", color="positive")
         ui.navigate.to(f"/sessions/{new_id}")

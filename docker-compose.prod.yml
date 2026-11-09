@@ -8,6 +8,7 @@ services:
     environment:
       APP_ENV: production
       DATABASE_URL: ${DATABASE_URL}
+      STORAGE_SECRET: ${STORAGE_SECRET}
     networks:
       default:
       web:
