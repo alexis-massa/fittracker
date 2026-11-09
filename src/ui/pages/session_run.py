@@ -1,13 +1,18 @@
 # src/ui/pages/session_run.py
 from collections.abc import Callable
 from dataclasses import dataclass
+import json
+from pathlib import Path
+from typing import Any
 
 from nicegui import ui
+from nicegui.events import GenericEventArguments
 
 from src.auth import current_user_id
 from src.models import session as session_model
 from src.models.exercise import SessionExercise
 from src.models.session import Session
+from src.ui.components import btn_danger
 from src.ui.components import btn_ghost
 from src.ui.components import btn_primary
 from src.ui.components import exercise_pictogram
@@ -15,6 +20,11 @@ from src.ui.components import form_card
 from src.ui.components import page_title
 from src.ui.components.session_info_fields import apply_session_info
 from src.ui.components.session_info_fields import session_info_fields
+
+_RUNNER_JS = Path(__file__).resolve().parents[3] / "static" / "runner.js"
+# The mtime busts the browser cache whenever runner.js changes.
+_RUNNER_URL = f"/static/runner.js?v={int(_RUNNER_JS.stat().st_mtime)}"
+_ICON_URL = "/static/icons/icon-512.png"
 
 
 @dataclass
@@ -30,9 +40,11 @@ class _Phase:
 
 @dataclass
 class _RunState:
+    """Mirror of the browser-side timer, which owns the clock; this only drives what's shown."""
+
     index: int = 0
-    remaining: int = 0
     paused: bool = False
+    started: bool = False
     saved: bool = False
 
 
@@ -53,46 +65,37 @@ def render(session_id: str | None) -> None:
             ui.label("This session has no exercises to run.").classes("text-caption opacity-70")
             return
 
-        state = _RunState(remaining=phases[0].seconds)
+        ui.add_head_html(
+            f'<script src="{_RUNNER_URL}"></script>'
+            f"<script>FitRunner.init({_script_json(_runner_config(s, phases))});</script>"
+        )
+
+        state = _RunState()
         progress = ui.linear_progress(value=0, show_value=False).classes("w-full q-mb-md")
         content = ui.column().classes("w-full items-center")
-
-        def advance() -> None:
-            state.index += 1
-            if state.index < len(phases):
-                state.remaining = phases[state.index].seconds
-                _beep()
-            refresh()
-
-        def tick() -> None:
-            if state.paused or state.index >= len(phases):
-                return
-            phase = phases[state.index]
-            if phase.seconds <= 0:
-                return  # reps-based work: waits on manual "Series done"
-            state.remaining -= 1
-            if state.remaining <= 0:
-                advance()
-            else:
-                refresh()
-
-        def toggle_pause() -> None:
-            state.paused = not state.paused
-            refresh()
 
         def refresh() -> None:
             progress.set_value(min(state.index / len(phases), 1.0))
             content.clear()
             with content:
-                if state.index >= len(phases):
+                if not state.started:
+                    _render_ready()
+                elif state.index >= len(phases):
                     if state.saved:
                         _render_saved(s)
                     else:
                         _render_reflect(s, state, refresh)
                 else:
-                    _render_phase(phases[state.index], state, advance, toggle_pause)
+                    _render_phase(phases[state.index], state)
 
-        ui.timer(1.0, tick)
+        def on_run_state(e: GenericEventArguments) -> None:
+            update = (e.args["index"], e.args["paused"], e.args["started"])
+            if update == (state.index, state.paused, state.started):
+                return
+            state.index, state.paused, state.started = update
+            refresh()
+
+        ui.on("run_state", on_run_state)
         refresh()
 
 
@@ -133,12 +136,50 @@ def _build_phases(s: Session) -> list[_Phase]:
     return phases
 
 
-def _render_phase(
-    phase: _Phase,
-    state: _RunState,
-    advance: Callable[[], None],
-    toggle_pause: Callable[[], None],
-) -> None:
+def _runner_config(s: Session, phases: list[_Phase]) -> dict[str, Any]:
+    return {
+        "name": f"Session {s.date}",
+        "backUrl": f"/sessions/{s.id}",
+        "icon": _ICON_URL,
+        "phases": [_phase_payload(p) for p in phases],
+    }
+
+
+def _phase_payload(phase: _Phase) -> dict[str, Any]:
+    ex = phase.exercise
+    name = " ".join(filter(None, [ex.short_name, ex.label]))
+    subtitle = (
+        f"Series {phase.series}/{ex.sets} · "
+        f"{phase.group} {phase.exercise_index + 1}/{phase.total_exercises}"
+    )
+    if phase.kind == "work" and phase.seconds <= 0:
+        subtitle += f" · {ex.reps} reps"
+    return {
+        "seconds": phase.seconds,
+        "title": f"{'Rest' if phase.kind == 'rest' else 'Work'} · {name}",
+        "subtitle": subtitle,
+    }
+
+
+def _script_json(data: Any) -> str:
+    """JSON safe to embed in an inline <script> (exercise labels are user-typed)."""
+    return json.dumps(data).replace("<", "\\u003c")
+
+
+def _client_button(button: ui.button, js: str) -> ui.button:
+    """Run `js` in the browser on click: audio and the timer must start from a real tap."""
+    return button.on("click", js_handler=f"() => {js}")
+
+
+def _render_ready() -> None:
+    ui.label("Ready?").classes("text-h5 text-weight-bold q-mb-sm")
+    ui.label("Keeps the screen on and puts pause / skip on your lock screen.").classes(
+        "text-caption opacity-70 q-mb-md"
+    )
+    _client_button(btn_primary("Start workout"), "FitRunner.begin()")
+
+
+def _render_phase(phase: _Phase, state: _RunState) -> None:
     ex = phase.exercise
     ui.label(
         f"{phase.group.upper()} · exercise {phase.exercise_index + 1}/{phase.total_exercises}"
@@ -151,20 +192,34 @@ def _render_phase(
 
     if phase.kind == "rest":
         ui.label("REST").classes("text-caption opacity-70")
-        ui.label(_mmss(state.remaining)).classes("text-h2 text-weight-bold q-my-md")
+        _clock(phase.seconds)
         ui.label(f"series {phase.series}/{ex.sets} next").classes("text-caption opacity-70 q-mb-md")
     elif phase.seconds > 0:
         ui.label(f"series {phase.series}/{ex.sets}").classes("text-caption opacity-70")
-        ui.label(_mmss(state.remaining)).classes("text-h2 text-weight-bold q-my-md")
+        _clock(phase.seconds)
     else:
         ui.label(f"series {phase.series}/{ex.sets}").classes("text-caption opacity-70")
         ui.label(f"{ex.reps} reps").classes("text-h2 text-weight-bold q-my-md")
-        btn_primary("Series done", on_click=advance)
+        _client_button(btn_primary("Series done"), "FitRunner.next()")
 
     with ui.row().classes("items-center gap-2 q-mt-md"):
-        if phase.kind == "rest" or phase.seconds > 0:
-            btn_ghost("Pause" if not state.paused else "Resume", on_click=toggle_pause)
-            btn_ghost("Skip", on_click=advance)
+        _client_button(btn_ghost("Resume" if state.paused else "Pause"), "FitRunner.toggle()")
+        _client_button(btn_ghost("Skip"), "FitRunner.next()")
+        _client_button(btn_ghost("Restart"), "FitRunner.restartPhase()")
+    with ui.row().classes("items-center gap-2 q-mt-sm"):
+        _client_button(
+            btn_ghost("Reset workout"),
+            "confirm('Start the whole workout over?') && FitRunner.restartWorkout()",
+        )
+        _client_button(
+            btn_danger("Stop"),
+            "confirm('Stop this workout? Nothing is saved.') && FitRunner.stop()",
+        )
+
+
+def _clock(seconds: int) -> None:
+    # The browser rewrites this text every 250ms; the server only sets its starting value.
+    ui.label(_mmss(seconds)).props("id=run-clock").classes("text-h2 text-weight-bold q-my-md")
 
 
 def _render_reflect(s: Session, state: _RunState, refresh: Callable[[], None]) -> None:
@@ -197,16 +252,3 @@ def _render_saved(s: Session) -> None:
 def _mmss(seconds: int) -> str:
     minutes, secs = divmod(max(seconds, 0), 60)
     return f"{minutes:01d}:{secs:02d}"
-
-
-def _beep() -> None:
-    ui.run_javascript(
-        "try {"
-        "const c = new (window.AudioContext || window.webkitAudioContext)();"
-        "const o = c.createOscillator();"
-        "o.frequency.value = 880;"
-        "o.connect(c.destination);"
-        "o.start();"
-        "setTimeout(() => o.stop(), 150);"
-        "} catch (e) {}"
-    )

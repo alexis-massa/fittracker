@@ -57,6 +57,28 @@ And run the app:
 uv run main.py
 ```
 
+## Running a workout
+
+"Start" on a session opens a guided timer. The clock runs in your browser
+rather than on the server, so it keeps going when the screen locks, and it
+plays a beep at every step. Tapping **Start workout** keeps the screen on and
+puts controls on your lock screen / notification shade (Media Session API):
+
+| Control | Does |
+| --- | --- |
+| play / pause | pause or resume the timer |
+| next | skip to the next step |
+| previous | restart this step; twice in a row goes back one step |
+| stop | leave the workout (nothing is saved) |
+
+**Reset workout** (start over) is in the app only, to avoid a stray tap on the
+lock screen wiping your progress. The lock-screen controls rely on a silent
+audio loop (browsers only show them for audio, and keep the page alive for it),
+so which buttons appear depends on your phone and browser. If the page is
+killed in the background the workout restarts from the beginning.
+
+JS timer tests run with `node --test tests/js/*.test.js` (no dependencies).
+
 ## Users and access
 
 The app is private: every page requires a login, and each user has their own

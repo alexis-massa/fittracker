@@ -6,6 +6,7 @@ appended automatically to `[Unreleased]` by a commit hook (see
 [README.md](README.md)); versions are cut and tagged on `main` by hand.
 
 ## [Unreleased]
+- feat: run the workout timer in the browser with lock-screen controls
 - chore: trim the Docker image and keep logins across redeploys
 - feat: add private multi-user accounts with per-user data, login and password change
 - fix: send credentials when fetching the PWA manifest

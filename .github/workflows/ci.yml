@@ -41,6 +41,9 @@ jobs:
       - name: Type check
         run: uv run mypy src
 
+      - name: JS tests
+        run: node --test tests/js/*.test.js
+
       - name: Test
         run: uv run pytest
         env:
