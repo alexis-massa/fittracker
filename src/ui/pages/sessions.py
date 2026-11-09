@@ -1,6 +1,7 @@
 # src/ui/pages/sessions.py
 from nicegui import ui
 
+from src.auth import current_user_id
 from src.models import session as session_model
 from src.ui.components import btn_ghost
 from src.ui.components import btn_primary
@@ -11,7 +12,7 @@ from src.utils.formatting import pluralize
 
 
 def render() -> None:
-    sessions = session_model.get_all()
+    sessions = session_model.get_all(current_user_id())
 
     with ui.column().classes("page-content"):
         with page_header_row():

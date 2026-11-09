@@ -1,6 +1,7 @@
 # src/ui/pages/session_detail.py
 from nicegui import ui
 
+from src.auth import current_user_id
 from src.models import session as session_model
 from src.models.exercise import SessionExercise
 from src.ui.components import btn_danger
@@ -20,7 +21,7 @@ def render(session_id: str | None) -> None:
         ui.label("No session selected.").classes("text-caption opacity-70")
         return
 
-    s = session_model.get_by_id(session_id)
+    s = session_model.get_by_id(current_user_id(), session_id)
     if not s:
         ui.label("Session not found.").classes("text-caption opacity-70")
         return
@@ -90,7 +91,7 @@ def _exercise_row(ex: SessionExercise, dim: bool = False) -> None:
 
 def _delete(session_id: str) -> None:
     def do_delete() -> None:
-        session_model.delete(session_id)
+        session_model.delete(current_user_id(), session_id)
         ui.notify("Session deleted")
         ui.navigate.to("/")
 

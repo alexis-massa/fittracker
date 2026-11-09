@@ -1,4 +1,5 @@
 # src/ui/components/__init__.py
+from src.ui.components.account_menu import account_menu
 from src.ui.components.action_row import action_row
 from src.ui.components.btn_danger import btn_danger
 from src.ui.components.btn_ghost import btn_ghost
@@ -19,6 +20,7 @@ from src.ui.components.textarea_field import textarea_field
 from src.ui.components.theme_toggle import theme_toggle
 
 __all__ = [
+    "account_menu",
     "action_row",
     "btn_danger",
     "btn_ghost",

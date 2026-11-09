@@ -6,6 +6,9 @@ appended automatically to `[Unreleased]` by a commit hook (see
 [README.md](README.md)); versions are cut and tagged on `main` by hand.
 
 ## [Unreleased]
+- chore: trim the Docker image and keep logins across redeploys
+- feat: add private multi-user accounts with per-user data, login and password change
+- fix: send credentials when fetching the PWA manifest
 - chore: remove release commit's self-referential changelog entry
 
 ## [0.3.0] - 2026-10-28

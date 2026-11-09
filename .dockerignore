@@ -1,0 +1,10 @@
+.git
+.venv
+.env
+.nicegui
+.claude
+.mypy_cache
+.ruff_cache
+.pytest_cache
+__pycache__
+preferences.json

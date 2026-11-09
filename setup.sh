@@ -13,6 +13,7 @@ cat > .env << EOF
 DATABASE_URL=postgresql://fittracker:fittracker@localhost:5433/fittracker
 APP_PORT=8080
 COMPOSE_PROFILES=dev
+STORAGE_SECRET=$(python3 -c 'import secrets; print(secrets.token_hex(32))')
 EOF
 echo "Wrote .env"
 
@@ -22,3 +23,4 @@ echo "Installed dependencies and git hooks"
 
 echo
 echo "Ready: docker compose up -d to start the local Postgres, then uv run main.py"
+echo "Then create your login: uv run python scripts/manage_users.py create YOURNAME"

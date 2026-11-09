@@ -1,3 +1,5 @@
+from psycopg_pool import ConnectionPool
+
 from src.utils import pg
 from src.utils.pg import PgTable
 
@@ -75,3 +77,56 @@ def test_delete_one_returns_true_and_removes_document(pg_table: PgTable) -> None
 
 def test_delete_one_returns_false_when_document_missing(pg_table: PgTable) -> None:
     assert pg.delete_one(pg_table, 999999) is False
+
+
+def _as_user(table: PgTable, user_id: int) -> PgTable:
+    return PgTable(table.pool, table.name, user_id)
+
+
+def test_find_all_only_returns_the_users_own_rows(pg_table: PgTable) -> None:
+    pg.insert_one(pg_table, {"name": "mine"})
+    pg.insert_one(_as_user(pg_table, 2), {"name": "theirs"})
+    assert [d["name"] for d in pg.find_all(pg_table)] == ["mine"]
+
+
+def test_find_one_ignores_rows_owned_by_someone_else(pg_table: PgTable) -> None:
+    theirs = pg.insert_one(_as_user(pg_table, 2), {"name": "theirs"})
+    assert pg.find_one(pg_table, theirs) is None
+
+
+def test_update_one_cannot_touch_rows_owned_by_someone_else(pg_table: PgTable) -> None:
+    other = _as_user(pg_table, 2)
+    theirs = pg.insert_one(other, {"name": "theirs"})
+    assert pg.update_one(pg_table, theirs, {"name": "hijacked"}) is False
+    assert pg.find_one(other, theirs) == {"name": "theirs", "_id": theirs}
+
+
+def test_delete_one_cannot_touch_rows_owned_by_someone_else(pg_table: PgTable) -> None:
+    other = _as_user(pg_table, 2)
+    theirs = pg.insert_one(other, {"name": "theirs"})
+    assert pg.delete_one(pg_table, theirs) is False
+    assert pg.find_one(other, theirs) is not None
+
+
+def test_ensure_table_adds_owner_column_leaving_existing_rows_unowned(
+    pg_pool: ConnectionPool, table_name: str
+) -> None:
+    legacy = f"{table_name}_legacy"
+    with pg_pool.connection() as conn:
+        conn.execute(f"CREATE TABLE {legacy} (id SERIAL PRIMARY KEY, doc JSONB NOT NULL)")
+        conn.execute(f'INSERT INTO {legacy} (doc) VALUES (\'{{"name": "old"}}\')')
+    try:
+        pg.ensure_table(pg_pool, legacy)
+        assert pg.count_unowned(pg_pool, legacy) == 1
+        assert pg.find_all(PgTable(pg_pool, legacy, 1)) == []
+    finally:
+        with pg_pool.connection() as conn:
+            conn.execute(f"DROP TABLE {legacy}")
+
+
+def test_claim_unowned_assigns_orphans_to_a_user(pg_pool: ConnectionPool, table_name: str) -> None:
+    with pg_pool.connection() as conn:
+        conn.execute(f'INSERT INTO {table_name} (doc) VALUES (\'{{"name": "old"}}\')')
+    assert pg.claim_unowned(pg_pool, table_name, 7) == 1
+    assert pg.count_unowned(pg_pool, table_name) == 0
+    assert [d["name"] for d in pg.find_all(PgTable(pg_pool, table_name, 7))] == ["old"]

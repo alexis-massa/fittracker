@@ -136,38 +136,63 @@ def test_session_exercise_from_definition_with_variant() -> None:
 def test_get_all_returns_definitions_sorted_by_name(exercises_table: PgTable) -> None:
     pg.insert_one(exercises_table, {"name": "B", "label": "Situp", "variants": []})
     pg.insert_one(exercises_table, {"name": "A", "label": "Pushup", "variants": []})
-    assert [defn.name for defn in exercise.get_all()] == ["A", "B"]
+    names = [defn.name for defn in exercise.get_all(exercises_table.user_id)]
+    assert names == ["A", "B"]
 
 
 def test_get_by_id_returns_matching_definition(exercises_table: PgTable) -> None:
     inserted_id = pg.insert_one(exercises_table, {"name": "A", "label": "Pushup", "variants": []})
-    defn = exercise.get_by_id(inserted_id)
+    defn = exercise.get_by_id(exercises_table.user_id, inserted_id)
     assert defn is not None
     assert defn.name == "A"
 
 
 def test_get_by_id_returns_none_when_missing(exercises_table: PgTable) -> None:
-    assert exercise.get_by_id("999999") is None
+    assert exercise.get_by_id(exercises_table.user_id, "999999") is None
 
 
 def test_create_persists_definition_and_returns_id(exercises_table: PgTable) -> None:
-    defn = ExerciseDefinition(name="A", label="Pushup")
-    new_id = exercise.create(defn)
-    stored = exercise.get_by_id(new_id)
+    uid = exercises_table.user_id
+    new_id = exercise.create(uid, ExerciseDefinition(name="A", label="Pushup"))
+    stored = exercise.get_by_id(uid, new_id)
     assert stored is not None
     assert stored.name == "A"
 
 
 def test_update_modifies_existing_definition(exercises_table: PgTable) -> None:
-    defn = ExerciseDefinition(name="A", label="Pushup")
-    new_id = exercise.create(defn)
+    uid = exercises_table.user_id
+    new_id = exercise.create(uid, ExerciseDefinition(name="A", label="Pushup"))
     updated = ExerciseDefinition(name="A", label="Push-up")
-    assert exercise.update(new_id, updated) is True
-    assert exercise.get_by_id(new_id).label == "Push-up"  # type: ignore[union-attr]
+    assert exercise.update(uid, new_id, updated) is True
+    assert exercise.get_by_id(uid, new_id).label == "Push-up"  # type: ignore[union-attr]
 
 
 def test_delete_removes_definition(exercises_table: PgTable) -> None:
-    defn = ExerciseDefinition(name="A", label="Pushup")
-    new_id = exercise.create(defn)
-    assert exercise.delete(new_id) is True
-    assert exercise.get_by_id(new_id) is None
+    uid = exercises_table.user_id
+    new_id = exercise.create(uid, ExerciseDefinition(name="A", label="Pushup"))
+    assert exercise.delete(uid, new_id) is True
+    assert exercise.get_by_id(uid, new_id) is None
+
+
+# ---------------------------------------------------------------------------
+# Per-user isolation
+# ---------------------------------------------------------------------------
+
+
+def test_each_user_has_their_own_exercise_library(exercises_table: PgTable) -> None:
+    alice, bob = exercises_table.user_id, exercises_table.user_id + 1
+    exercise.create(alice, ExerciseDefinition(name="A"))
+    exercise.create(bob, ExerciseDefinition(name="B"))
+    assert [d.name for d in exercise.get_all(alice)] == ["A"]
+    assert [d.name for d in exercise.get_all(bob)] == ["B"]
+
+
+def test_other_users_cannot_read_update_or_delete_an_exercise(exercises_table: PgTable) -> None:
+    owner, other = exercises_table.user_id, exercises_table.user_id + 1
+    new_id = exercise.create(owner, ExerciseDefinition(name="A", label="Pushup"))
+    assert exercise.get_by_id(other, new_id) is None
+    assert exercise.update(other, new_id, ExerciseDefinition(name="A", label="Hacked")) is False
+    assert exercise.delete(other, new_id) is False
+    stored = exercise.get_by_id(owner, new_id)
+    assert stored is not None
+    assert stored.label == "Pushup"

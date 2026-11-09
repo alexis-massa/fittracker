@@ -1,6 +1,7 @@
 # src/ui/pages/exercises.py
 from nicegui import ui
 
+from src.auth import current_user_id
 from src.models import exercise as exercise_model
 from src.models.exercise import ExerciseDefinition
 from src.ui.components import btn_danger
@@ -47,7 +48,7 @@ def render() -> None:
         # (create_slot is already in the column, declared before page_header_row)
 
         # ── Exercise list ─────────────────────────────────────────────────
-        exercises = exercise_model.get_all()
+        exercises = exercise_model.get_all(current_user_id())
 
         if not exercises:
             ui.label("No exercises yet. Add your first one.").classes("text-caption opacity-70")
@@ -78,7 +79,7 @@ def render() -> None:
 
 def _delete(exercise_id: str, name: str) -> None:
     def do_delete() -> None:
-        exercise_model.delete(exercise_id)
+        exercise_model.delete(current_user_id(), exercise_id)
         ui.notify("Exercise deleted")
         ui.navigate.to("/exercises")
 

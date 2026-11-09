@@ -1,6 +1,7 @@
 # src/ui/pages/exercise_form.py
 from nicegui import ui
 
+from src.auth import current_user_id
 from src.models import exercise as exercise_model
 from src.models.exercise import ExerciseDefinition
 from src.models.exercise import ExerciseVariant
@@ -15,7 +16,11 @@ from src.ui.pages.exercise_create_form import exercise_create_form
 
 
 def render(exercise_id: str | None) -> None:
-    existing = exercise_model.get_by_id(exercise_id) if exercise_id else None
+    existing = exercise_model.get_by_id(current_user_id(), exercise_id) if exercise_id else None
+
+    if exercise_id and not existing:
+        ui.label("Exercise not found.").classes("text-caption opacity-70")
+        return
 
     if not existing:
         # New exercise — use the shared creation form directly
@@ -103,7 +108,7 @@ def _save(
     )
 
     if exercise_id:
-        exercise_model.update(exercise_id, defn)
+        exercise_model.update(current_user_id(), exercise_id, defn)
         ui.notify("Exercise updated", color="positive")
 
     ui.navigate.to("/exercises")

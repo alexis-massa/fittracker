@@ -9,6 +9,8 @@ __pycache__/
 
 preferences.json
 
+.nicegui/
+
 .claude/worktrees/
 
 .DS_Store
