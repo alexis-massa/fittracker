@@ -18,6 +18,9 @@ RUN uv sync --frozen --no-install-project --no-dev
 COPY --chown=app:app . .
 RUN uv sync --frozen --no-dev
 
+# Login sessions live here; prod mounts a volume on it so deploys don't log everyone out.
+RUN mkdir .nicegui
+
 EXPOSE 8080
 
 # Run the venv's own interpreter directly rather than "uv run" - uv run

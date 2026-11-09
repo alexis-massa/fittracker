@@ -89,8 +89,8 @@ uv run python scripts/manage_users.py claim-legacy YOURNAME
 
 Production needs `STORAGE_SECRET` set (a long random string that signs the
 login cookies; the app refuses to start without it — see `.env.example`).
-Logins are stored in the container's filesystem, so everyone has to sign in
-again after a redeploy. The login form is throttled (5 failed attempts per
+Logins are kept in a Docker volume (`nicegui-storage`), so redeploys don't
+sign anyone out. The login form is throttled (5 failed attempts per
 username, then a 5-minute lock), and you can drop the Caddy `basic_auth` labels
 in `docker-compose.prod.yml` if you'd rather not have a second login in front.
 
