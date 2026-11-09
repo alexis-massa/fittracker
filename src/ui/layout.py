@@ -11,7 +11,7 @@ _NAV_TABS: list[tuple[str, str, str]] = [
 ]
 
 _PWA_HEAD = """
-<link rel="manifest" href="/static/manifest.webmanifest">
+<link rel="manifest" href="/static/manifest.webmanifest" crossorigin="use-credentials">
 <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
 <meta name="theme-color" content="#5898d4">
 <meta name="mobile-web-app-capable" content="yes">

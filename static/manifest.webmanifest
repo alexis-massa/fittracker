@@ -2,6 +2,7 @@
   "name": "FitTracker",
   "short_name": "FitTracker",
   "description": "A personal workout tracker built around the Lafay method's timed set/rest circuits.",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
