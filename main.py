@@ -71,7 +71,9 @@ def duplicate_session(session_id: str) -> None:
     session_form_page(None, duplicate_from=session_id)
 
 
-@ui.page("/sessions/{session_id}/run")
+# A locked phone drops the websocket; waiting longer before discarding the page keeps
+# the workout on screen instead of reloading it from the start.
+@ui.page("/sessions/{session_id}/run", reconnect_timeout=3600)
 def run_session(session_id: str) -> None:
     render_header("sessions")
     session_run_page(session_id)
