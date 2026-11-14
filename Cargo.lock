@@ -1249,8 +1249,8 @@ dependencies = [
 
 [[package]]
 name = "pi-common"
-version = "0.3.0"
-source = "git+ssh://git@github.com/alexis-massa/pi-kit.git?tag=v0.3.0#de922df9d521b350bf3acdebbf36dab7b3220b94"
+version = "0.3.1"
+source = "git+ssh://git@github.com/alexis-massa/pi-kit.git?tag=v0.3.1#ff1dd82580ac83eca3ed1a1ff0dbc254100517ff"
 dependencies = [
  "argon2",
  "axum",

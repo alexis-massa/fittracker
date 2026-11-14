@@ -1,4 +1,4 @@
-# pi-kit v0.3.0
+# pi-kit v0.3.1
 # The binary is cross-compiled on the laptop (`just build`), so the image is only that file:
 # no shell, no libc, no package manager. Built for linux/arm64 (`just image`).
 FROM scratch

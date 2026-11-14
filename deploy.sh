@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# pi-kit v0.3.0
+# pi-kit v0.3.1
 # Ship an image to the Pi and switch to it; if the health check fails, switch back. Usually run as
 # `just deploy` / `just rollback`.
 #

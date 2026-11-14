@@ -1,4 +1,4 @@
-# pi-kit v0.3.0
+# pi-kit v0.3.1
 [toolchain]
 channel = "1.100"
 components = ["rustfmt", "clippy"]
