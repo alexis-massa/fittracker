@@ -14,7 +14,7 @@ the browser, listed in PROGRESS.md.
 - [x] Sign out — `tests/api.rs::login_logout_and_password_change`
 - [x] A deleted user is logged out on the next request — `tests/api.rs::deleted_user_is_logged_out`
 - [x] Dark mode is a per-user preference, toggled from the header — `tests/api.rs::preferences_are_per_user`, (manual)
-- [ ] Caddy basic auth in front of the whole site (labels from `.env`) — `compose.yml`, (manual: owner's test on the preview)
+- [x] Caddy basic auth in front of the whole site (labels from `.env`) — `compose.yml`, (manual: owner tested on the preview, 2026-11-15)
 
 ## Data isolation
 - [x] A user only lists, opens, changes and deletes their own sessions and exercises — `tests/api.rs::users_cannot_touch_each_others_data`
@@ -40,7 +40,7 @@ the browser, listed in PROGRESS.md.
 ## Guided run
 - [x] Phases: rest before (if > 0), then per set work (timed or reps), rest between sets — `web/src/lib/phases.test.ts`
 - [x] Timer in the browser: start, pause/resume, skip, restart phase, previous (double press), reset workout, stop; catches up after a frozen tab — `web/src/lib/runner.test.ts` (port of `runner.test.js`)
-- [ ] Screen kept on, lock-screen controls (Media Session), beep on each phase change, silent audio to stay alive — (manual, phone: owner's test on the preview)
+- [x] Screen kept on, lock-screen controls (Media Session), beep on each phase change, silent audio to stay alive — (manual, phone: owner tested on the preview, 2026-11-15)
 - [x] Reflection at the end (date, weight pre-filled from the last completed session, energy, progress, notes), Save or Skip — `tests/api.rs::last_weight`, (manual)
 
 ## Install and tooling

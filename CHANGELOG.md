@@ -5,7 +5,7 @@ names the image after `git describe`.
 
 ## Unreleased
 
-## [0.5.0] - unreleased
+## [0.5.0] - 2026-11-15
 - Rewrite on the pi-kit stack (Rust + Svelte 5), same features and data (see PARITY.md); the Python
   version is the tag `python-final`.
 - Login sessions are stored in the database: everyone logs in once more after the update.
