@@ -1,4 +1,4 @@
-# pi-kit v0.3.1
+# pi-kit v0.4.1
 # The image needs only the binary staged by `just build`.
 *
 !dist/app

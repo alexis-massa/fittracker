@@ -569,7 +569,7 @@ checksum = "1c66915cc5391097de7a2b0b972e8505aa33c0df401fd3a6811dbdb32881ba48"
 
 [[package]]
 name = "fittracker"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "axum",
  "axum-extra",
@@ -1249,8 +1249,8 @@ dependencies = [
 
 [[package]]
 name = "pi-common"
-version = "0.3.1"
-source = "git+ssh://git@github.com/alexis-massa/pi-kit.git?tag=v0.3.1#ff1dd82580ac83eca3ed1a1ff0dbc254100517ff"
+version = "0.4.1"
+source = "git+ssh://git@github.com/alexis-massa/pi-kit.git?tag=v0.4.1#e4fa6eff7521e3fe9edb28347d89e59db8067d4a"
 dependencies = [
  "argon2",
  "axum",

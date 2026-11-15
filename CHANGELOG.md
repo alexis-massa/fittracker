@@ -5,6 +5,9 @@ names the image after `git describe`.
 
 ## Unreleased
 
+## [0.5.1] - 2026-11-15
+- chore: upgrade to pi-kit v0.4.1, the same version as the other apps (no behaviour change)
+
 ## [0.5.0] - 2026-11-15
 - Rewrite on the pi-kit stack (Rust + Svelte 5), same features and data (see PARITY.md); the Python
   version is the tag `python-final`.
