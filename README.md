@@ -28,6 +28,10 @@ what proves the rewrite keeps it.
 
 `INSTANCE=fittracker-preview just …` targets the preview instance instead of the live one.
 
+CI (GitHub Actions, `.github/workflows/ci.yml`) runs `just lint`, `just test` and the builds on every push to
+`main` and every pull request; it reads pi-kit with the repository secret `PI_KIT_DEPLOY_KEY` (pi-kit README,
+"CI in an app"). Nothing is deployed from CI.
+
 The binary: `fittracker serve | migrate | healthcheck | baseline | create-user NAME | set-password NAME |
 list-users | delete-user NAME | claim-legacy NAME | seed-exercises NAME` (replacing the Python
 `scripts/manage_users.py` and `scripts/seed_exercises.py`).

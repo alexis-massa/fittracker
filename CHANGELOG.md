@@ -4,6 +4,7 @@ All notable changes. Versions are git tags (`vX.Y.Z`); `just deploy` deploys the
 names the image after `git describe`.
 
 ## Unreleased
+- chore: CI (GitHub Actions: lint, tests, builds) and Dependabot for the actions, from pi-kit v0.4.2
 
 ## [0.5.1] - 2026-11-15
 - chore: upgrade to pi-kit v0.4.1, the same version as the other apps (no behaviour change)
