@@ -17,4 +17,4 @@ in pi-kit's DECISIONS.md.
 | 2026-11-14 | The service worker precaches the app shell (pi-ui preset) | The Python one only made the app installable; the shell now opens without network, data still needs it |
 | 2026-11-14 | Pictograms are generated from the Python source into `web/src/lib/pictograms.ts` | One mechanical copy instead of re-typing 26 SVGs |
 | 2026-11-14 | No GitHub Actions; `just lint` / `just test` and the pre-commit hook | Fresh-clone builds need the private pi-kit; local checks are enough for one maintainer |
-| 2026-11-14 | Preview instance `fittracker-preview` on `fittracker-preview.dermaquiz.duckdns.org`, on a copy of the database | `fittracker.duckdns.org` currently resolves to a wrong IP; DuckDNS resolves sub-names of a working domain |
+| 2026-11-14 | Preview instance `fittracker-preview` on `fittracker-preview.dermaquiz.duckdns.org`, on a copy of the database (removed at the cutover) | DuckDNS resolves sub-names of a working domain, so no new DNS record; the copy kept the live data safe |
