@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO exercises (doc) VALUES ('{\"name\": \"orphan\"}')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "33db9eda11761dbcd869d25252e785d8b44666541830149ac332da233b24054a"
+}

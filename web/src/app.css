@@ -1,0 +1,86 @@
+/* FitTracker's look on top of pi-ui's tokens: its blue, and a few layout classes shared by the pages. */
+:root {
+  --brand: #5898d4;
+  --brand-ink: #ffffff;
+}
+
+h1 {
+  font-size: var(--text-xl);
+}
+h2 {
+  margin-top: var(--space-6);
+  font-size: var(--text-lg);
+}
+h3,
+h4 {
+  margin: var(--space-2) 0;
+}
+
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.card {
+  margin-bottom: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.grow {
+  flex: 1;
+  min-width: 10rem;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0 var(--space-3);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.row > .actions {
+  margin-top: 0;
+}
+
+.muted {
+  color: var(--muted);
+}
+.small {
+  font-size: var(--text-sm);
+}
+
+.tag {
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  background: var(--border);
+  font-size: var(--text-sm);
+}
+
+button.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}

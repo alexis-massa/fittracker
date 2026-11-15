@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT u.username,\n                  (SELECT count(*) FROM sessions s WHERE s.user_id = u.id) AS \"sessions!\",\n                  (SELECT count(*) FROM exercises e WHERE e.user_id = u.id) AS \"exercises!\"\n           FROM users u ORDER BY u.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "username",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "username"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "sessions!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "exercises!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "73b6873c2c59c2f94ed632d538542ddf425f8c56ea5dcc05a0c1e4948b2d39b4"
+}

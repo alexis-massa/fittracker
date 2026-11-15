@@ -1,11 +1,18 @@
 # Changelog
 
-All notable changes to this project are documented here. Format loosely
-follows [Keep a Changelog](https://keepachangelog.com/). New entries are
-appended automatically to `[Unreleased]` by a commit hook (see
-[README.md](README.md)); versions are cut and tagged on `main` by hand.
+All notable changes. Versions are git tags (`vX.Y.Z`); `just deploy` deploys the checked-out commit and
+names the image after `git describe`.
 
-## [Unreleased]
+## Unreleased
+
+## [0.5.0] - unreleased
+- Rewrite on the pi-kit stack (Rust + Svelte 5), same features and data (see PARITY.md); the Python
+  version is the tag `python-final`.
+- Login sessions are stored in the database: everyone logs in once more after the update.
+- Old scrypt passwords keep working and are upgraded to argon2id at the next login.
+- The installed app's shell opens without network.
+- User admin is the binary's subcommands (`create-user`, `set-password`, `list-users`, `delete-user`,
+  `claim-legacy`, `seed-exercises`).
 
 ## [0.4.0] - 2026-11-10
 - feat: run the workout timer in the browser with lock-screen controls

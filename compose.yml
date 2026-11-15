@@ -1,0 +1,34 @@
+# pi-kit v0.3.1
+# Runs on the Pi from ~/INSTANCE/ (deploy.sh copies this file there; INSTANCE is the app's name unless set).
+# Values come from that folder's .env (APP_DOMAIN). See pi-infra APP_CONTRACT.md.
+name: fittracker
+
+services:
+  app:
+    image: fittracker:current
+    restart: unless-stopped
+    env_file: .env
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges=true]
+    user: "65534:65534"
+    networks: [web, data]
+    logging:
+      driver: json-file
+      options: { max-size: 10m, max-file: "3" }
+    # List form: compose fills ${...} in values only, and the basic-auth user is part of a label key.
+    labels:
+      - caddy=${APP_DOMAIN}
+      - caddy.reverse_proxy={{upstreams 8080}}
+      - caddy.encode=zstd gzip
+      - caddy.header.Strict-Transport-Security=max-age=31536000
+      # fittracker: the whole site is behind basic auth. The hash is bcrypt (`caddy hash-password`); in .env
+      # every `$` of it is written `$$`, which compose turns back into `$` (never export .env from a shell).
+      - caddy.basic_auth=
+      - caddy.basic_auth.${FITTRACKER_BASIC_AUTH_USER}=${FITTRACKER_BASIC_AUTH_HASH}
+
+networks:
+  web:
+    external: true
+  data:
+    external: true

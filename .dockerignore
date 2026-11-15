@@ -1,10 +1,4 @@
-.git
-.venv
-.env
-.nicegui
-.claude
-.mypy_cache
-.ruff_cache
-.pytest_cache
-__pycache__
-preferences.json
+# pi-kit v0.3.1
+# The image needs only the binary staged by `just build`.
+*
+!dist/app

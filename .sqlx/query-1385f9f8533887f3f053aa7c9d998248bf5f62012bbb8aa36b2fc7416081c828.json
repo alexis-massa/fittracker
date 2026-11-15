@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE exercises SET user_id = $1 WHERE user_id IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1385f9f8533887f3f053aa7c9d998248bf5f62012bbb8aa36b2fc7416081c828"
+}
