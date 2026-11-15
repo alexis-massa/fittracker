@@ -4,7 +4,7 @@ Handoff between work sessions: read it first, update it last. The whole rewrite 
 PROGRESS.md (phase 2 = this app).
 
 ## State (2026-11-15)
-- **Live on the new stack** (v0.5.0, pi-kit v0.3.1) at https://fitracker.duckdns.org (note: one `t`), behind Caddy
+- **Live on the new stack** (v0.5.0, pi-kit v0.4.1) at https://fitracker.duckdns.org (note: one `t`), behind Caddy
   basic auth. Cut over 2026-11-15 08:48 UTC; the Python version is the tag `python-final`.
 - Cutover: backup (restore-checked) → image shipped while the old app ran → old app stopped → `baseline` →
   `deploy`. 76 s from stop to healthy (about 40 s of it a needless rebuild: next time `just ship`, stop, then

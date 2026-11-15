@@ -1,12 +1,12 @@
 [package]
 name = "fittracker"
-version = "0.5.0"
+version = "0.5.1"
 edition = "2024"
 rust-version = "1.100"
 publish = false
 
 [dependencies]
-pi-common = { git = "ssh://git@github.com/alexis-massa/pi-kit.git", tag = "v0.3.1" }
+pi-common = { git = "ssh://git@github.com/alexis-massa/pi-kit.git", tag = "v0.4.1" }
 axum = { version = "0.8", features = ["macros"] }
 axum-extra = { version = "0.12", features = ["cookie"] }
 clap = { version = "4", features = ["derive"] }
