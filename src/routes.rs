@@ -17,7 +17,7 @@ use axum::http::StatusCode;
 use axum::routing::{get, patch, post};
 use axum::{Json, Router};
 use axum_extra::extract::cookie::CookieJar;
-use pi_common::auth::{self, LoginThrottle, Session as Login, SessionOptions, Sessions};
+use pi_common::auth::{self, LoginThrottle, Session, SessionOptions, Sessions};
 use pi_common::cli::{Context, MIN_PASSWORD_LEN};
 use pi_common::{ApiResult, AppError, BoxError, static_files};
 use rust_embed::RustEmbed;
@@ -25,7 +25,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 
 use crate::docs::{self, DocKind, Stored};
-use crate::model::{self, Exercise, Session, SessionExercise};
+use crate::model::{self, Exercise, SessionExercise, Workout};
 use crate::users::{self, Preferences, Users};
 
 /// The Svelte build (`web/dist`), embedded at compile time; read from disk in debug builds.
@@ -63,7 +63,7 @@ pub async fn build(ctx: Context) -> Result<Router, BoxError> {
         sessions,
         throttle: Arc::new(LoginThrottle::new(THROTTLE_FAILURES, THROTTLE_WINDOW)),
     };
-    let session_routes = doc_routes::<Session>()
+    let session_routes = doc_routes::<Workout>()
         .route("/last-used", get(last_used))
         .route("/last-weight", get(last_weight));
     Ok(Router::new()
@@ -94,11 +94,11 @@ struct Me {
     dark_mode: bool,
 }
 
-async fn me_for(pool: &PgPool, login: &Login) -> ApiResult<Json<Me>> {
-    let user = users::get(pool, login.user_id).await?;
+async fn me_for(pool: &PgPool, session: &Session) -> ApiResult<Json<Me>> {
+    let user = users::get(pool, session.user_id).await?;
     Ok(Json(Me {
         username: user.username,
-        csrf_token: login.csrf_token.clone(),
+        csrf_token: session.csrf_token.clone(),
         dark_mode: user.preferences.dark_mode,
     }))
 }
@@ -119,16 +119,16 @@ async fn login(
     Ok((jar, me_for(&state.pool, &session).await?))
 }
 
-async fn me(State(pool): State<PgPool>, login: Login) -> ApiResult<Json<Me>> {
-    me_for(&pool, &login).await
+async fn me(State(pool): State<PgPool>, session: Session) -> ApiResult<Json<Me>> {
+    me_for(&pool, &session).await
 }
 
 async fn logout(
     State(sessions): State<Sessions>,
     jar: CookieJar,
-    login: Login,
+    session: Session,
 ) -> ApiResult<(CookieJar, StatusCode)> {
-    Ok((sessions.end(jar, &login).await?, StatusCode::NO_CONTENT))
+    Ok((sessions.end(jar, &session).await?, StatusCode::NO_CONTENT))
 }
 
 #[derive(Deserialize)]
@@ -140,7 +140,7 @@ struct PasswordBody {
 /// Change one's own password: the current one is checked (and throttled) like a login.
 async fn change_password(
     State(state): State<AppState>,
-    login: Login,
+    session: Session,
     Json(body): Json<PasswordBody>,
 ) -> ApiResult<StatusCode> {
     if body.new.chars().count() < MIN_PASSWORD_LEN {
@@ -148,7 +148,7 @@ async fn change_password(
             "Password must be at least {MIN_PASSWORD_LEN} characters."
         )));
     }
-    let username = users::get(&state.pool, login.user_id).await?.username;
+    let username = users::get(&state.pool, session.user_id).await?.username;
     let checked = auth::verify_login(
         &Users(&state.pool),
         &state.throttle,
@@ -166,17 +166,17 @@ async fn change_password(
         }
         Err(other) => return Err(other),
     }
-    users::set_password(&state.pool, login.user_id, &body.new).await?;
+    users::set_password(&state.pool, session.user_id, &body.new).await?;
     Ok(StatusCode::NO_CONTENT)
 }
 
 async fn set_preferences(
     State(pool): State<PgPool>,
-    login: Login,
+    session: Session,
     Json(changes): Json<Preferences>,
 ) -> ApiResult<Json<Preferences>> {
     Ok(Json(
-        users::update_preferences(&pool, login.user_id, changes).await?,
+        users::update_preferences(&pool, session.user_id, changes).await?,
     ))
 }
 
@@ -195,49 +195,51 @@ fn doc_routes<T: DocKind>() -> Router<AppState> {
 
 async fn list_docs<T: DocKind>(
     State(pool): State<PgPool>,
-    login: Login,
+    session: Session,
 ) -> ApiResult<Json<Vec<Stored<T>>>> {
-    Ok(Json(docs::list(&pool, users::to_id(login.user_id)?).await?))
+    Ok(Json(
+        docs::list(&pool, users::to_id(session.user_id)?).await?,
+    ))
 }
 
 async fn get_doc<T: DocKind>(
     State(pool): State<PgPool>,
-    login: Login,
+    session: Session,
     Path(id): Path<i32>,
 ) -> ApiResult<Json<Stored<T>>> {
     Ok(Json(
-        docs::get(&pool, users::to_id(login.user_id)?, id).await?,
+        docs::get(&pool, users::to_id(session.user_id)?, id).await?,
     ))
 }
 
 async fn create_doc<T: DocKind>(
     State(pool): State<PgPool>,
-    login: Login,
+    session: Session,
     Json(doc): Json<T>,
 ) -> ApiResult<(StatusCode, Json<Stored<T>>)> {
     let doc = doc.validate().map_err(AppError::BadRequest)?;
-    let stored = docs::insert(&pool, users::to_id(login.user_id)?, doc).await?;
+    let stored = docs::insert(&pool, users::to_id(session.user_id)?, doc).await?;
     Ok((StatusCode::CREATED, Json(stored)))
 }
 
 async fn update_doc<T: DocKind>(
     State(pool): State<PgPool>,
-    login: Login,
+    session: Session,
     Path(id): Path<i32>,
     Json(doc): Json<T>,
 ) -> ApiResult<Json<Stored<T>>> {
     let doc = doc.validate().map_err(AppError::BadRequest)?;
     Ok(Json(
-        docs::update(&pool, users::to_id(login.user_id)?, id, doc).await?,
+        docs::update(&pool, users::to_id(session.user_id)?, id, doc).await?,
     ))
 }
 
 async fn delete_doc<T: DocKind>(
     State(pool): State<PgPool>,
-    login: Login,
+    session: Session,
     Path(id): Path<i32>,
 ) -> ApiResult<StatusCode> {
-    docs::delete::<T>(&pool, users::to_id(login.user_id)?, id).await?;
+    docs::delete::<T>(&pool, users::to_id(session.user_id)?, id).await?;
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -252,15 +254,15 @@ struct LastUsedQuery {
 
 async fn last_used(
     State(pool): State<PgPool>,
-    login: Login,
+    session: Session,
     Query(q): Query<LastUsedQuery>,
 ) -> ApiResult<Json<Option<SessionExercise>>> {
-    let sessions = docs::list::<Session>(&pool, users::to_id(login.user_id)?).await?;
+    let sessions = docs::list::<Workout>(&pool, users::to_id(session.user_id)?).await?;
     let found = model::last_used(sessions.iter().map(|s| &s.doc), &q.name, &q.variant);
     Ok(Json(found.cloned()))
 }
 
-async fn last_weight(State(pool): State<PgPool>, login: Login) -> ApiResult<Json<Option<f64>>> {
-    let sessions = docs::list::<Session>(&pool, users::to_id(login.user_id)?).await?;
+async fn last_weight(State(pool): State<PgPool>, session: Session) -> ApiResult<Json<Option<f64>>> {
+    let sessions = docs::list::<Workout>(&pool, users::to_id(session.user_id)?).await?;
     Ok(Json(model::last_weight(sessions.iter().map(|s| &s.doc))))
 }
