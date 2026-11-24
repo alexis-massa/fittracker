@@ -4,6 +4,8 @@ All notable changes. Versions are git tags (`vX.Y.Z`); `just deploy` deploys the
 names the image after `git describe`.
 
 ## Unreleased
+- chore: upgrade to pi-kit v0.4.4 (no behaviour change)
+- Login throttle: 5 failures per 15 min (was 5 min), pi-kit's default
 - refactor: the workout type is `Workout`, so `Session` only means a login session (no behaviour change)
 - chore: CI (GitHub Actions: lint, tests, builds) and Dependabot for the actions, from pi-kit v0.4.2
 

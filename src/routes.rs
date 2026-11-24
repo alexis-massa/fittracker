@@ -10,7 +10,6 @@
 //! | `GET /api/sessions/last-weight` | weight pre-fill for the reflection |
 
 use std::sync::Arc;
-use std::time::Duration;
 
 use axum::extract::{FromRef, Path, Query, State};
 use axum::http::StatusCode;
@@ -33,10 +32,6 @@ use crate::users::{self, Preferences, Users};
 #[folder = "web/dist"]
 #[allow_missing = true]
 struct Assets;
-
-/// Failed logins allowed per user name in [`THROTTLE_WINDOW`] (the Python version's limits).
-const THROTTLE_FAILURES: usize = 5;
-const THROTTLE_WINDOW: Duration = Duration::from_secs(5 * 60);
 
 /// Shared state of the handlers.
 #[derive(Clone, FromRef)]
@@ -61,7 +56,7 @@ pub async fn build(ctx: Context) -> Result<Router, BoxError> {
     let state = AppState {
         pool: ctx.pool,
         sessions,
-        throttle: Arc::new(LoginThrottle::new(THROTTLE_FAILURES, THROTTLE_WINDOW)),
+        throttle: Arc::new(LoginThrottle::default()),
     };
     let session_routes = doc_routes::<Workout>()
         .route("/last-used", get(last_used))
