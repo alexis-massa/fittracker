@@ -18,3 +18,4 @@ in pi-kit's DECISIONS.md.
 | 2026-11-14 | Pictograms are generated from the Python source into `web/src/lib/pictograms.ts` | One mechanical copy instead of re-typing 26 SVGs |
 | 2026-11-14 | No GitHub Actions; `just lint` / `just test` and the pre-commit hook | Fresh-clone builds need the private pi-kit; local checks are enough for one maintainer |
 | 2026-11-14 | Preview instance `fittracker-preview` on `fittracker-preview.dermaquiz.duckdns.org`, on a copy of the database (removed at the cutover) | DuckDNS resolves sub-names of a working domain, so no new DNS record; the copy kept the live data safe |
+| 2026-11-24 | Login throttle follows pi-kit's default (5 / 15 min) instead of the Python version's 5 min | One rule for every app |
