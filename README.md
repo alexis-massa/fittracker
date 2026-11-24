@@ -3,7 +3,7 @@
 A personal workout tracker built around the Lafay method's timed set/rest circuits: an exercise library
 with variants and pictograms, session plans (warmup, workout, stretches), a guided run with a timer that
 keeps going with the screen locked, and a short reflection after each session. Multi-user, installable as
-a phone app (PWA), behind Caddy basic auth on the Raspberry Pi.
+a phone app (PWA) on the Raspberry Pi.
 
 Built from the [pi-kit](https://github.com/alexis-massa/pi-kit) template (Rust: axum, sqlx; Svelte 5 PWA
 embedded in the binary); the shared code is pinned by tag in `Cargo.toml` and `web/package.json`. The
@@ -45,10 +45,9 @@ list-users | delete-user NAME | claim-legacy NAME | seed-exercises NAME` (replac
   timer core, `src/lib/workout.ts` its browser side (sound, wake lock, lock-screen controls).
 - `data/lafay_exercises.json` the library `seed-exercises` adds, embedded in the binary.
 - Files with a `# pi-kit vX.Y.Z` header are copied from pi-kit; upgrade them with pi-kit's UPGRADING.md.
-  App-specific parts: the basic-auth labels in `compose.yml`, the recipes after the marker in `justfile`.
+  App-specific parts: the recipes after the marker in `justfile`.
 
 ## Configuration
 
 Environment only (`.env`, never committed; see `.env.example` and pi-infra's `APP_CONTRACT.md`):
-`DATABASE_URL`, `APP_DOMAIN`, `BIND_ADDR`, `COOKIE_SECURE`, `SESSION_DAYS`, `RUST_LOG`, and on the Pi
-`FITTRACKER_BASIC_AUTH_USER` / `FITTRACKER_BASIC_AUTH_HASH` (bcrypt, each `$` written `$$`).
+`DATABASE_URL`, `APP_DOMAIN`, `BIND_ADDR`, `COOKIE_SECURE`, `SESSION_DAYS`, `RUST_LOG`.

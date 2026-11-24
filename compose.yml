@@ -16,16 +16,11 @@ services:
     logging:
       driver: json-file
       options: { max-size: 10m, max-file: "3" }
-    # List form: compose fills ${...} in values only, and the basic-auth user is part of a label key.
     labels:
       - caddy=${APP_DOMAIN}
       - caddy.reverse_proxy={{upstreams 8080}}
       - caddy.encode=zstd gzip
       - caddy.header.Strict-Transport-Security=max-age=31536000
-      # fittracker: the whole site is behind basic auth. The hash is bcrypt (`caddy hash-password`); in .env
-      # every `$` of it is written `$$`, which compose turns back into `$` (never export .env from a shell).
-      - caddy.basic_auth=
-      - caddy.basic_auth.${FITTRACKER_BASIC_AUTH_USER}=${FITTRACKER_BASIC_AUTH_HASH}
 
 networks:
   web:

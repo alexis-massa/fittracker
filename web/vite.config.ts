@@ -5,8 +5,6 @@ export default defineApp({
   description: "A personal workout tracker built around the Lafay method's timed set/rest circuits.",
   themeColor: '#5898d4',
   backgroundColor: '#17181c',
-  // The whole site is behind Caddy basic auth: the manifest must be fetched with credentials.
-  useCredentials: true,
   manifest: { id: '/', orientation: 'portrait-primary' },
   icons: [
     { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
