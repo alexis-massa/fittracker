@@ -4,6 +4,7 @@ All notable changes. Versions are git tags (`vX.Y.Z`); `just deploy` deploys the
 names the image after `git describe`.
 
 ## Unreleased
+- refactor: the workout type is `Workout`, so `Session` only means a login session (no behaviour change)
 - chore: CI (GitHub Actions: lint, tests, builds) and Dependabot for the actions, from pi-kit v0.4.2
 
 ## [0.5.1] - 2026-11-15

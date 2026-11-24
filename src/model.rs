@@ -71,7 +71,7 @@ pub enum Progress {
 /// A workout: a plan until it is run, then also how it went (`completed`).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(default)]
-pub struct Session {
+pub struct Workout {
     /// ISO date, `YYYY-MM-DD`.
     pub date: String,
     /// Body weight in kg.
@@ -87,7 +87,7 @@ pub struct Session {
     pub completed: bool,
 }
 
-impl Default for Session {
+impl Default for Workout {
     fn default() -> Self {
         Self {
             date: Local::now().date_naive().to_string(),
@@ -103,7 +103,7 @@ impl Default for Session {
     }
 }
 
-impl Session {
+impl Workout {
     /// Warmup, workout and stretches, in that order.
     pub fn exercises(&self) -> impl Iterator<Item = &SessionExercise> {
         self.warmup
@@ -116,12 +116,12 @@ impl Session {
 /// The most recent use of exercise `name` in `sessions` (newest first), preferring one with the same
 /// variant; pre-fills the effort of a new row.
 pub fn last_used<'a>(
-    sessions: impl IntoIterator<Item = &'a Session>,
+    sessions: impl IntoIterator<Item = &'a Workout>,
     name: &str,
     variant: &str,
 ) -> Option<&'a SessionExercise> {
     let mut fallback = None;
-    for ex in sessions.into_iter().flat_map(Session::exercises) {
+    for ex in sessions.into_iter().flat_map(Workout::exercises) {
         if ex.name != name {
             continue;
         }
@@ -134,7 +134,7 @@ pub fn last_used<'a>(
 }
 
 /// The weight of the most recent completed session in `sessions` (newest first), if it has one.
-pub fn last_weight<'a>(sessions: impl IntoIterator<Item = &'a Session>) -> Option<f64> {
+pub fn last_weight<'a>(sessions: impl IntoIterator<Item = &'a Workout>) -> Option<f64> {
     sessions
         .into_iter()
         .find(|s| s.completed)
@@ -143,7 +143,7 @@ pub fn last_weight<'a>(sessions: impl IntoIterator<Item = &'a Session>) -> Optio
 
 /// Checks the API applies before storing documents (the Python version did them in its forms).
 pub mod validate {
-    use super::{Exercise, Session, SessionExercise};
+    use super::{Exercise, SessionExercise, Workout};
 
     /// Trim names and drop variants without a name; the name is required.
     pub fn exercise(mut ex: Exercise) -> Result<Exercise, String> {
@@ -161,7 +161,7 @@ pub mod validate {
     }
 
     /// Ranges of the Python form; a date when completed; energy 1–5; reps or duration, not both.
-    pub fn session(mut s: Session) -> Result<Session, String> {
+    pub fn session(mut s: Workout) -> Result<Workout, String> {
         s.date = s.date.trim().to_owned();
         s.notes = s
             .notes
@@ -212,7 +212,7 @@ mod tests {
 
     #[test]
     fn missing_fields_take_the_python_defaults() {
-        let s: Session = serde_json::from_value(json!({ "workout": [{ "name": "A" }] })).unwrap();
+        let s: Workout = serde_json::from_value(json!({ "workout": [{ "name": "A" }] })).unwrap();
         assert_eq!(s.progress, Progress::Maintain);
         assert!(!s.completed && s.energy_level.is_none());
         assert_eq!(s.date, Local::now().date_naive().to_string());
@@ -237,7 +237,7 @@ mod tests {
             "workout": [{ "name": "A", "label": "Pushup", "variant_name": "1", "variant_label": "Wide",
                           "sets": 4, "reps": 0, "duration": 30, "rest_before": 60, "rest_seconds": 90 }],
         });
-        let s: Session = serde_json::from_value(doc.clone()).unwrap();
+        let s: Workout = serde_json::from_value(doc.clone()).unwrap();
         assert_eq!(serde_json::to_value(&s).unwrap(), doc);
         let ex = json!({ "name": "A", "label": "Pushup", "variants": [{ "name": "1", "label": "Wide" }] });
         let parsed: Exercise = serde_json::from_value(ex.clone()).unwrap();
@@ -248,7 +248,7 @@ mod tests {
         completed: bool,
         weight: Option<f64>,
         exercises: &[(&str, &str, i32)],
-    ) -> Session {
+    ) -> Workout {
         let workout = exercises
             .iter()
             .map(|(name, variant, sets)| SessionExercise {
@@ -258,7 +258,7 @@ mod tests {
                 ..Default::default()
             })
             .collect();
-        Session {
+        Workout {
             completed,
             weight,
             workout,
@@ -321,7 +321,7 @@ mod tests {
                 ..Default::default()
             };
             f(&mut ex);
-            validate::session(Session {
+            validate::session(Workout {
                 workout: vec![ex],
                 ..Default::default()
             })
@@ -331,12 +331,12 @@ mod tests {
         assert!(with(|e| e.sets = 0).is_err());
         assert!(with(|e| e.rest_seconds = 3601).is_err());
         assert!(with(|e| e.name.clear()).is_err());
-        let bad_date = Session {
+        let bad_date = Workout {
             date: "yesterday".into(),
             ..Default::default()
         };
         assert!(validate::session(bad_date).is_err());
-        let bad_energy = Session {
+        let bad_energy = Workout {
             energy_level: Some(6),
             ..Default::default()
         };

@@ -10,7 +10,7 @@ use serde::de::DeserializeOwned;
 use sqlx::types::Json;
 use sqlx::{AssertSqlSafe, PgPool};
 
-use crate::model::{self, Exercise, Session};
+use crate::model::{self, Exercise, Workout};
 
 /// A kind of document and its table.
 pub trait DocKind: Serialize + DeserializeOwned + Send + Sync + Unpin + 'static {
@@ -30,7 +30,7 @@ impl DocKind for Exercise {
     }
 }
 
-impl DocKind for Session {
+impl DocKind for Workout {
     const TABLE: &'static str = "sessions";
     const ORDER: &'static str = "doc ->> 'date' DESC, id DESC";
     fn validate(self) -> Result<Self, String> {
