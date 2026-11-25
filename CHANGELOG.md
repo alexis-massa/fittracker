@@ -4,6 +4,7 @@ All notable changes. Versions are git tags (`vX.Y.Z`); `just deploy` deploys the
 names the image after `git describe`.
 
 ## Unreleased
+- chore: `release.yml` publishes a GitHub Release (notes from this file) when a `vX.Y.Z` tag is pushed; CLAUDE.md says to release before deploying (#30)
 
 ## [0.5.2] - 2026-11-24
 - chore: upgrade to pi-kit v0.4.4 (no behaviour change)
